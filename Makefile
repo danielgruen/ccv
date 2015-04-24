@@ -39,6 +39,7 @@ src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 
 lut_2pc:
 	@echo "don't know how to make lut_2pc, but will ignore that"
+
 lut_W:
 	@echo "========== checking for availability of W lut =========="
 	bash helpers/lut_W.sh $(REDSHIFT)
@@ -46,8 +47,10 @@ lut_W:
 
 lut_U:
 	@echo "don't know how to make lut_U, but will ignore that"
+
 lut_sigmam:
 	@echo "don't know how to make lut_sigmam, but will ignore that"
+
 lut_bias:
 	@echo "========== checking for availability of bias lut =========="
 	bash helpers/lut_bias.sh $(REDSHIFT)
@@ -60,8 +63,10 @@ lut_dndM:
 
 lut_rho0:
 	@echo "don't know how to make lut_rho0, but will ignore that"
+
 lut_profiles:
 	@echo "don't know how to make lut_profiles, but will ignore that"
+
 
 ### lut_software
 
@@ -137,3 +142,4 @@ src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmol
 
 src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 	$(CPP) -fopenmp -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
+
