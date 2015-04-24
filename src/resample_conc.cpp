@@ -19,7 +19,7 @@ int main(int argc, char **argv)
 
   if(argc!=5)
   {
-   cout << "syntax: " << argv[0] << "[zlens] [annulus definition file] [logM*100] [destination]" << endl;
+   cout << "syntax: " << argv[0] << " [zlens] [annulus definition file] [logM*100] [destination]" << endl;
    return 0;
   }
 

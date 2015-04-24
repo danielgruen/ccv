@@ -3,6 +3,7 @@ LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits
 CPP=g++
 CORES=15
 REDSHIFT=0.24533
+ZLONG=0.2453300 # must be 1.7 digits
 ANNULI=annuli_keiichi.tab
 
 LIBFLAGS_TMV=-ltmv -lblas -lpthread
@@ -25,7 +26,7 @@ model: model_corrh model_conc model_ell						# co-added and resampled temples ac
 
 template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell
 
-model_software: src/resample_ell #src/resample_conc src/resample_corrh
+model_software: src/resample_ell src/resample_conc src/resample_corrh
 
 
 #### lut
@@ -83,9 +84,15 @@ src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h s
 
 #### model
 
-model_corrh:
+model_corrh: 
+	@echo "========== checking for availability of corrh model =========="
+	bash helpers/model_corrh.sh $(REDSHIFT) $(ANNULI)
+	@echo "========== finished with corrh model =========="
 
 model_conc:
+	@echo "========== checking for availability of conc model =========="
+	bash helpers/model_conc.sh $(REDSHIFT) $(ANNULI) $(CORES)
+	@echo "========== finished with conc model =========="
 
 model_ell:
 	@echo "========== checking for availability of ell model =========="
@@ -98,11 +105,11 @@ model_ell:
 src/resample_ell: src/resample_ell.cpp src/enfw/template_ell.h src/cosmology.h
 	$(CPP) -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_ell.cpp
 
-#src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.h
-#	$(CPP) -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_conc.cpp
+src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.h
+	$(CPP) -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_conc.cpp
 
-#src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
-#	$(CPP) -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_corrh.cpp
+src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_corrh.cpp
 
 ### filter library
 
