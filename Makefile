@@ -2,8 +2,7 @@ INCLUDES=-I ~/werc3/include
 LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits
 CPP=g++
 CORES=15
-REDSHIFT=0.24533
-ZLONG=0.2453300 # must be 1.7 digits
+REDSHIFT=0.35
 ANNULI=annuli_keiichi.tab
 
 LIBFLAGS_TMV=-ltmv -lblas -lpthread
@@ -13,7 +12,7 @@ all: software lut templates model
 
 ##### all
 
-software: template_software model_software					# programs to calculate covariances
+software: lut_software template_software model_software					# programs to calculate covariances
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_bias lut_dndM lut_rho0 lut_profiles	# look-up tables
 
@@ -28,19 +27,26 @@ template_software: src/template_corrh src/template_corrh_combine src/template_co
 
 model_software: src/resample_ell src/resample_conc src/resample_corrh
 
+lut_software: src/calc_W src/calc_bias
 
 #### lut
 
 lut_2pc:
 	@echo "don't know how to make lut_2pc, but will ignore that"
 lut_W:
-	@echo "don't know how to make lut_W, but will ignore that"
+	@echo "========== checking for availability of W lut =========="
+	bash helpers/lut_W.sh $(REDSHIFT)
+	@echo "========== finished with W lut =========="
+
 lut_U:
 	@echo "don't know how to make lut_U, but will ignore that"
 lut_sigmam:
 	@echo "don't know how to make lut_sigmam, but will ignore that"
 lut_bias:
-	@echo "don't know how to make lut_bias, but will ignore that"
+	@echo "========== checking for availability of bias lut =========="
+	bash helpers/lut_bias.sh $(REDSHIFT)
+	@echo "========== finished with bias lut =========="
+
 lut_dndM:
 	@echo "don't know how to make lut_dndM, but will ignore that"
 lut_rho0:
@@ -48,6 +54,13 @@ lut_rho0:
 lut_profiles:
 	@echo "don't know how to make lut_profiles, but will ignore that"
 
+### lut_software
+
+src/calc_W: src/calc_W.cpp src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
+	$(CPP) -fopenmp -o src/calc_W $(INCLUDES) $(LIBFLAGS) src/calc_W.cpp
+
+src/calc_bias: src/calc_bias.cpp src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
+	$(CPP) -fopenmp -o src/calc_bias $(INCLUDES) $(LIBFLAGS) src/calc_bias.cpp
 
 #### templates
 
