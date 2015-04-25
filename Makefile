@@ -14,7 +14,7 @@ all: software lut templates model
 
 software: lut_software template_software model_software tinker			# programs to calculate covariances
 
-lut: lut_2pc lut_W lut_U lut_sigmam lut_bias lut_dndM lut_rho0 lut_profiles	# look-up tables
+lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles		# look-up tables
 
 templates: templates_corrh templates_conc templates_ell				# templates for intrinsic covariance components
 
@@ -27,7 +27,7 @@ template_software: src/template_corrh src/template_corrh_combine src/template_co
 
 model_software: src/resample_ell src/resample_conc src/resample_corrh
 
-lut_software: src/calc_W src/calc_bias
+lut_software: src/calc_W 
 
 tinker: src/mktinkerconf
 	$(MAKE) -C src/tinker
@@ -51,15 +51,10 @@ lut_U:
 lut_sigmam:
 	@echo "don't know how to make lut_sigmam, but will ignore that"
 
-lut_bias:
-	@echo "========== checking for availability of bias lut =========="
-	bash helpers/lut_bias.sh $(REDSHIFT)
-	@echo "========== finished with bias lut =========="
-
 lut_dndM:
-	@echo "========== checking for availability of bias lut =========="
+	@echo "========== checking for availability of dndM lut =========="
 	bash helpers/lut_dndM.sh $(REDSHIFT)
-	@echo "========== finished with bias lut =========="
+	@echo "========== finished with dndM lut =========="
 
 lut_rho0:
 	@echo "don't know how to make lut_rho0, but will ignore that"
@@ -72,9 +67,6 @@ lut_profiles:
 
 src/calc_W: src/calc_W.cpp src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
 	$(CPP) -fopenmp -o src/calc_W $(INCLUDES) $(LIBFLAGS) src/calc_W.cpp
-
-src/calc_bias: src/calc_bias.cpp src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp -o src/calc_bias $(INCLUDES) $(LIBFLAGS) src/calc_bias.cpp
 
 #### templates
 

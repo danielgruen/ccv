@@ -8,4 +8,8 @@ fi
 
 zlong=`printf "%1.7f\n" $1`
 
-./src/resample_corrh $1 $2 templates/corrh_${zlong}.fits model/corrh_${zlong}.fits
+if [ ! -f model/corrh_${zlong}.fits ]
+then
+  ./src/resample_corrh $1 $2 templates/corrh_${zlong}.fits model/corrh_${zlong}.fits
+fi
+

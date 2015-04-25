@@ -26,3 +26,5 @@ then
  n=0
 fi
 done
+
+wait
