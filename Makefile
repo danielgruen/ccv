@@ -150,6 +150,7 @@ pub/templates_conc.tar.gz: templates/conc/cov_100.fits
 pub/templates_ell.tar.gz: templates/ell/cov_100.fits
 	tar czf pub/templates_ell.tar.gz templates/ell/*.fits
 
-pub/ccv.tar.gz: 
+pub/ccv.tar.gz:
+	git commit -a
 	bash helpers/pack_software.sh $(VERSION)
 	
