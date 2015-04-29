@@ -141,7 +141,7 @@ src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 ### pack templates and make available online (to be run by Daniel...)
 
 pub: pub/templates_conc.tar.gz pub/templates_ell.tar.gz pub/ccv.tar.gz
-	rsync -avv pub/templates_conc.tar.gz pub/templates_ell.tar.gz templates/corrh_*fits dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/templates/
+	rsync -avv pub/templates_conc.tar.gz pub/templates_ell.tar.gz templates/corrh_*fits lut/W*tab lut/dndM*tab dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/templates/
 
 pub/templates_conc.tar.gz: templates_conc
 	rm -f pub/templates_conc.tar.gz
