@@ -5,7 +5,7 @@ CORES=47
 REDSHIFTS=0.24533 0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686
 ANNULI=annuli_keiichi.tab
 
-LIBFLAGS_TMV=-ltmv -lblas -lpthread
+LIBFLAGS_TMV=-ltmv -lblas -lpthread -ltmv_symband
 
 
 all: software lut templates model
@@ -129,6 +129,9 @@ src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP) -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_corrh.cpp
+
+src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+	$(CPP) -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/getmodel.cpp
 
 ### filter library
 
