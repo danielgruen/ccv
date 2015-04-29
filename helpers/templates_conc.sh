@@ -10,8 +10,9 @@ i=0
 
 for (( ic=20; ic<=100; ic+=1 ))
 do
-  if [ ! -f templates/conc/cov_${ic}.fits ]
+  if [ ! -s templates/conc/cov_${ic}.fits ]
   then
+    rm -f templates/conc/cov_${ic}.fits
     c=`calc.sh $ic*0.1`
     ./src/template_conc $c templates/conc/cov_${ic}.fits &
     i=`expr $i + 1`

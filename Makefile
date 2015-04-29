@@ -1,8 +1,8 @@
 INCLUDES=-I ~/werc3/include 
 LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits
 CPP=g++
-CORES=15
-REDSHIFT=0.35
+CORES=47
+REDSHIFTS=0.24533 0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686
 ANNULI=annuli_keiichi.tab
 
 LIBFLAGS_TMV=-ltmv -lblas -lpthread
@@ -42,7 +42,7 @@ lut_2pc:
 
 lut_W:
 	@echo "========== checking for availability of W lut =========="
-	bash helpers/lut_W.sh $(REDSHIFT)
+	bash helpers/lut_W.sh $(REDSHIFTS)
 	@echo "========== finished with W lut =========="
 
 lut_U:
@@ -53,7 +53,7 @@ lut_sigmam:
 
 lut_dndM:
 	@echo "========== checking for availability of dndM lut =========="
-	bash helpers/lut_dndM.sh $(REDSHIFT)
+	bash helpers/lut_dndM.sh $(REDSHIFTS)
 	@echo "========== finished with dndM lut =========="
 
 lut_rho0:
@@ -72,8 +72,8 @@ src/calc_W: src/calc_W.cpp src/corrh/corrh.h src/enfw/enfw.h src/profile/profile
 
 templates_corrh:
 	@echo "========== checking for availability of corrh templates =========="
-	bash helpers/templates_corrh.sh $(REDSHIFT) $(CORES)
-	bash helpers/templates_corrh_combine.sh $(REDSHIFT)
+	bash helpers/templates_corrh.sh $(REDSHIFTS) $(CORES)
+	bash helpers/templates_corrh_combine.sh $(REDSHIFTS)
 	@echo "========== finished with corrh templates =========="
 
 templates_conc:
@@ -105,17 +105,17 @@ src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h s
 
 model_corrh: 
 	@echo "========== checking for availability of corrh model =========="
-	bash helpers/model_corrh.sh $(REDSHIFT) $(ANNULI)
+	bash helpers/model_corrh.sh $(REDSHIFTS) $(ANNULI)
 	@echo "========== finished with corrh model =========="
 
 model_conc:
 	@echo "========== checking for availability of conc model =========="
-	bash helpers/model_conc.sh $(REDSHIFT) $(ANNULI) $(CORES)
+	bash helpers/model_conc.sh $(REDSHIFTS) $(ANNULI) $(CORES)
 	@echo "========== finished with conc model =========="
 
 model_ell:
 	@echo "========== checking for availability of ell model =========="
-	bash helpers/model_ell.sh $(REDSHIFT) $(ANNULI) $(CORES)
+	bash helpers/model_ell.sh $(REDSHIFTS) $(ANNULI) $(CORES)
 	@echo "========== finished with ell model =========="
 
 

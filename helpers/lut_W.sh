@@ -1,18 +1,24 @@
 #!/bin/bash
 
-if [ $# -ne 1 ]
+if [ $# -lt 1 ]
 then
-  echo "syntax: $0 [redshift]"
+  echo "syntax: $0 [redshift(s)]"
   exit 1
 fi
 
-zlong=`printf "%1.7f\n" $1`
-
-n=0
-
 mkdir -p lut/
 
-if [ ! -f lut/W${zlong}.tab ]
-then
-  ./src/calc_W $zlong > lut/W${zlong}.tab
-fi
+# iterate over redshifts
+while test ${#} -gt 0
+do
+
+  zlong=`printf "%1.7f\n" $1`
+
+  if [ ! -s lut/W${zlong}.tab ]
+  then
+    ./src/calc_W $zlong > lut/W${zlong}.tab
+  fi
+
+  shift
+done
+
