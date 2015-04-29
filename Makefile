@@ -1,10 +1,32 @@
+######## INSTALLATION INSTRUCTIONS ########
+#### (1) Edit the following lines to match your system / preferences
+#### (2) Run 'make' 
+####     -- This should compile all code needed to produce / handle the model.
+####     -- This should also download a bunch of pre-computed files from my system.
+####        If you are asking for the model at a redshift that I haven't pre-computed, it should 
+####        automatically do the calculation for you (but it may take several processor-days)
+#### (3) You can get the covariance of kappa in your selected set of annuli for any combination
+####     of redshift and mass by running ./src/getmodel, which outputs a fits file.
+####     See ./src/getmodel.cpp for how to handle this in c++ directly.
+
+### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
+CPP=g++
 INCLUDES=-I ~/werc3/include 
 LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits
 LIBFLAGS_TMV=-ltmv -lblas -lpthread -ltmv_symband
-CPP=g++
+
+### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
 CORES=47
-REDSHIFTS=0.24533 0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686
+
+### this is the list of redshifts for which the model should be prepared
+REDSHIFTS=0.24533 0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 
+# these are all that finished calculation for now; later add 0.363 0.391 0.399 0.440 0.450 0.451 0.686
+
+### annuli definition file according to what you sent me
+### simple format with N_annuli in the first line and then one line of theta_min theta_max each
 ANNULI=annuli_keiichi.tab
+
+######## END INSTALLATION INSTRUCTIONS ########
 
 VERSION=0.1
 
@@ -138,7 +160,12 @@ src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/e
 src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 	$(CPP) -fopenmp -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
 
-### pack templates and make available online (to be run by Daniel...)
+#### forget about model (and re-do later, e.g. if you have changed your annuli definition)
+
+forget_model:
+	rm -rf model/*
+
+#### pack templates and make available online (to be run by Daniel...)
 
 pub: pub/templates_conc.tar.gz pub/templates_ell.tar.gz pub/ccv.tar.gz
 	rsync -avv pub/templates_conc.tar.gz pub/templates_ell.tar.gz templates/corrh_*fits lut/W*tab lut/dndM*tab dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/templates/
