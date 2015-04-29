@@ -6,6 +6,23 @@ then
   exit 1
 fi
 
+if [ ! -s templates/ell/cov_100.fits ]
+then
+
+  URL=http://www.usm.uni-muenchen.de/~dgruen/code/templates/templates_ell.tar.gz
+
+  curl -s --head $URL | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
+  if [ $? -eq 0 ]
+  then    
+    echo "I am a lazy script and will download ell templates rather than calculating them"
+    curl $URL > pub/templates_ell.tar.gz
+    tar xzf pub/templates_ell.tar.gz
+    exit 0
+  fi
+fi
+
+
+
 i=0
 
 for (( ic=20; ic<=100; ic+=1 ))

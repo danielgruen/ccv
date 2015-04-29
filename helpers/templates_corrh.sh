@@ -14,6 +14,22 @@ do
 
   zlong=`printf "%1.7f\n" $1`
 
+  if [ -s templates/corrh_${zlong}.fits ]
+  then
+    continue
+  fi 
+
+  URL=http://www.usm.uni-muenchen.de/~dgruen/code/templates/corrh_${zlong}.fits
+
+  curl -s --head $URL | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
+  if [ $? -eq 0 ]
+  then    
+    echo "I am a lazy script and will download corrh template rather than calculating it"
+    curl $URL > templates/corrh_${zlong}.fits
+    continue
+  fi
+
+
   for (( m=80; m<=159; m++ ))
   do
     if [ ! -s templates/corrh/cov_${zlong}_$m.fits ]
