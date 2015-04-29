@@ -144,12 +144,10 @@ pub: pub/templates_conc.tar.gz pub/templates_ell.tar.gz pub/ccv.tar.gz
 	rsync -avv pub/templates_conc.tar.gz pub/templates_ell.tar.gz templates/corrh_*fits lut/W*tab lut/dndM*tab dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/templates/
 	rsync -avv pub/ccv-$(VERSION).tar.gz dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/
 
-pub/templates_conc.tar.gz: templates_conc
-	rm -f pub/templates_conc.tar.gz
+pub/templates_conc.tar.gz: templates/conc/cov_100.fits
 	tar czf pub/templates_conc.tar.gz templates/conc/*.fits
 
-pub/templates_ell.tar.gz: templates_ell
-	rm -f pub/templates_ell.tar.gz
+pub/templates_ell.tar.gz: templates/ell/cov_100.fits
 	tar czf pub/templates_ell.tar.gz templates/ell/*.fits
 
 pub/ccv.tar.gz: 
