@@ -14,6 +14,17 @@ do
 
   if [ ! -s lut/dndM${zlong}.tab ]
   then
+
+    URL=http://www.usm.uni-muenchen.de/~dgruen/code/templates/dndM${zlong}.tab
+
+    curl -s --head $URL | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
+    if [ $? -eq 0 ]
+    then
+      echo "I am a lazy script and will download dndM lut rather than calculating it"
+      curl $URL > lut/dndM${zlong}.tab
+      continue
+    fi
+
     ./src/mktinkerconf $zlong > src/tinker/dndm.conf
     ./src/tinker/massfunction.x src/tinker/dndm.conf
     rm -f hod-usedvalues 
