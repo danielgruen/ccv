@@ -10,7 +10,7 @@ fi
 mkdir -p model/conc
 n=0
 
-annuli=${@: -2}
+annuli="${@:(-2):1}"
 cores=${@: -1}
 
 while test ${#} -gt 2

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ $# -ne 2 ]
+if [ $# -lt 2 ]
 then
   echo "syntax: $0 [redshift(s)] [annulus file]"
   exit 1

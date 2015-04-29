@@ -25,7 +25,7 @@ model: model_corrh model_conc model_ell						# co-added and resampled temples ac
 
 template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell
 
-model_software: src/resample_ell src/resample_conc src/resample_corrh
+model_software: src/resample_ell src/resample_conc src/resample_corrh src/getmodel
 
 lut_software: src/calc_W 
 

@@ -6,6 +6,7 @@ then
   exit 1
 fi
 
+mkdir -p pub
 
 if [ ! -s templates/conc/cov_100.fits ]
 then

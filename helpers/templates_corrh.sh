@@ -16,6 +16,7 @@ do
 
   if [ -s templates/corrh_${zlong}.fits ]
   then
+    shift
     continue
   fi 
 
@@ -26,6 +27,7 @@ do
   then    
     echo "I am a lazy script and will download corrh template rather than calculating it"
     curl $URL > templates/corrh_${zlong}.fits
+    shift
     continue
   fi
 
