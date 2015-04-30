@@ -1,4 +1,8 @@
 ######## INSTALLATION INSTRUCTIONS ########
+#### (0) Make sure that you have all necessary libraries / software installed, including
+####     -- the tmv-cpp library, http://tmv-cpp.googlecode.com/
+####     -- the CCfits library, http://heasarc.gsfc.nasa.gov/fitsio/CCfits/
+####     -- curl for some automated downloading of templates
 #### (1) Edit the following lines to match your system / preferences
 #### (2) Run 'make' 
 ####     -- This should compile all code needed to produce / handle the model.
