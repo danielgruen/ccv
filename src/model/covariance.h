@@ -201,7 +201,7 @@ class FITSCovarianceMatrix : public CovarianceMatrix {
 	  ax2 = image.axis(1);
 	  assert(ax1==ax2);
 	} catch(...) {
-	  cerr << "# cannot open " << filename << "; giving up." << endl;
+	  cerr << "# cannot open " << filename << "; giving up. You should probably add that redshift to your Makefile and re-run \'make\' -- or maybe you are running the code from somewhere other than the base directory." << endl;
 	  throw;
 	}
 	    

@@ -6,6 +6,8 @@ then
   exit 1
 fi
 
+mkdir -p model
+
 annuli=${@: -1}
 
 while test ${#} -gt 1
