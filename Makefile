@@ -188,6 +188,6 @@ pub/templates_ell.tar.gz: templates/ell/cov_100.fits
 	tar czf pub/templates_ell.tar.gz templates/ell/*.fits
 
 pub/ccv.tar.gz:
-	git commit -a
+	-git commit -a
 	bash helpers/pack_software.sh $(VERSION)
 	
