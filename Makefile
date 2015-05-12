@@ -58,7 +58,7 @@ model: model_corrh model_conc model_ell						# co-added and resampled temples ac
 
 template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell
 
-model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel
+model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g
 
 lut_software: src/calc_W 
 
@@ -171,6 +171,8 @@ src/resample_corrh_g: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosm
 
 src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
 	$(CPP) -fopenmp src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/getmodel_g: src/getmodel_g.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+	$(CPP) -fopenmp src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 ### filter library
 
