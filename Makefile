@@ -12,6 +12,7 @@
 #### (3) You can get the covariance of kappa in your selected set of annuli for any combination
 ####     of redshift and mass by running ./src/getmodel, which outputs a fits file.
 ####     See ./src/getmodel.cpp for how to handle this in c++ directly.
+####     The analogous covariance matrix for gamma is output by ./src/getmodel_g
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
