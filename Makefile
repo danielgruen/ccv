@@ -12,33 +12,39 @@
 #### (3) You can get the covariance of kappa in your selected set of annuli for any combination
 ####     of redshift and mass by running ./src/getmodel, which outputs a fits file.
 ####     See ./src/getmodel.cpp for how to handle this in c++ directly.
+####     The analogous covariance matrix for gamma is output by ./src/getmodel_g
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
 INCLUDES=-I ~/werc3/include 
-LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits
-LIBFLAGS_TMV=-ltmv -lblas -lpthread -ltmv_symband
+LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
+LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=32
+CORES=48
 
 ### this is the list of redshifts for which the model should be prepared
 # PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
-REDSHIFTS=0.24533 0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 
+#REDSHIFTS=0.24533 0.5 
+# snapshots used in the paper
 
-# REDSHIFTS TO DO: these are computations in progress, will be put online as soon as they're finished
-# 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6
+#REDSHIFTS=0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 
+# CLASH
+
+REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 
+#0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
+# grid from 0.15 to 0.6
 
 # you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
 
 ### annuli definition file according to what you sent me
-### simple format with N_annuli in the first line and then one line of theta_min theta_max each
-#ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
-ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
+### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
+ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
+#ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
 
 ######## END INSTALLATION INSTRUCTIONS ########
 
-VERSION=0.1
+VERSION=0.2
 
 all: software lut templates model
 
@@ -57,7 +63,7 @@ model: model_corrh model_conc model_ell						# co-added and resampled temples ac
 
 template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell
 
-model_software: src/resample_ell src/resample_conc src/resample_corrh src/getmodel
+model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g
 
 lut_software: src/calc_W 
 
@@ -121,16 +127,16 @@ templates_ell:
 ### template_software
 
 src/template_corrh: src/template_corrh.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp -o src/template_corrh $(INCLUDES) $(LIBFLAGS) src/template_corrh.cpp
+	$(CPP) -fopenmp src/template_corrh.cpp -o src/template_corrh $(INCLUDES) $(LIBFLAGS) 
 
 src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS) src/template_corrh_combine.cpp
+	$(CPP) -fopenmp src/template_corrh_combine.cpp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS)
 
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
-	$(CPP) -fopenmp -o src/template_conc $(INCLUDES) $(LIBFLAGS) src/template_conc.cpp
+	$(CPP) -fopenmp src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
 
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
-	$(CPP) -fopenmp -o src/template_ell $(INCLUDES) $(LIBFLAGS) src/template_ell.cpp src/filter/filter.o
+	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
 
 
 #### model
@@ -154,25 +160,39 @@ model_ell:
 ### model software
 
 src/resample_ell: src/resample_ell.cpp src/enfw/template_ell.h src/cosmology.h
-	$(CPP) -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_ell.cpp
+	$(CPP) -fopenmp src/resample_ell.cpp -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_ell_g: src/resample_ell_g.cpp src/enfw/template_ell.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_ell_g.cpp -o src/resample_ell_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.h
-	$(CPP) -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_conc.cpp
+	$(CPP) -fopenmp src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_conc_g: src/resample_conc_g.cpp src/conc/template_conc.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
-	$(CPP) -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_corrh.cpp
+	$(CPP) -fopenmp src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_corrh_g: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_corrh_g.cpp -o src/resample_corrh_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
-	$(CPP) -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/getmodel.cpp
+	$(CPP) -fopenmp src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/getmodel_g: src/getmodel_g.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+	$(CPP) -fopenmp src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 ### filter library
 
 src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 	$(CPP) -fopenmp -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
 
+#### clean: re-compile software afterwards
+
+clean:
+	rm -f src/filter/filter.o src/getmodel_g src/getmodel src/resample_corrh_g src/resample_corrh src/resample_conc_g src/resample_conc src/resample_ell_g src/resample_ell src/template_ell src/template_conc src/template_corrh src/template_corrh_combine
+	$(MAKE) clean -C src/tinker
+
 #### forget about model (and re-do later, e.g. if you have changed your annuli definition)
 
-forget_model:
+clean_model:
 	rm -rf model/*
 
 #### pack templates and make available online (to be run by Daniel...)
