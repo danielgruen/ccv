@@ -12,7 +12,6 @@
 #### (3) You can get the covariance of kappa in your selected set of annuli for any combination
 ####     of redshift and mass by running ./src/getmodel, which outputs a fits file.
 ####     See ./src/getmodel.cpp for how to handle this in c++ directly.
-####     The analogous covariance matrix for gamma is output by ./src/getmodel_g
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
@@ -31,8 +30,7 @@ CORES=48
 #REDSHIFTS=0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 
 # CLASH
 
-REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 
-#0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
+REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
 # grid from 0.15 to 0.6
 
 # you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
