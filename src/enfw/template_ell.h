@@ -17,6 +17,7 @@ const double castep=0.01;
 const int    nca = 101;
 
 const int nv=1158;
+//const int nv=1500;
 const double vmin=-3.;          // can't just change these, would have to run profile_kappa_gamma again
 const double vfac=1.01;
 const double vstep=log10(vfac);
