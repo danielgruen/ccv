@@ -42,7 +42,7 @@ lflags     = -L$(FFTW)/lib -L$(GSL)/lib -lm -lgsl -lgslcblas -lfftw3
 objs       = cosmo.o lensing.o reduced_fit.o decomp_eb.o sn1a.o nofz.o lensing_3rd.o \
              constants.o fr_constants.o emu.o fr_emu.o hubble.o \
 	     cmb_bao.o halomodel.o hod.o errorlist.o io.o maths.o mvdens.o config.o par.o
-exec       = lensingdemo halomodeldemo decomp_eb_demo sn1ademo cmb_bao_demo \
+exec       = pkappa #lensingdemo halomodeldemo decomp_eb_demo sn1ademo cmb_bao_demo \
 	     third_order_demo cosebi_demo
 
 
@@ -55,6 +55,9 @@ links_check:
 	make $(exec)
 
 #	then echo "Type 'make links' then 'make' to compile demo programs"; \
+
+pkappa: pkappa.o libnicaea.$(EXT)
+	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
 
 lensingdemo: lensingdemo.o libnicaea.$(EXT)
 	$(CC) -o $@ $^ $(lflags) -lnicaea -L.

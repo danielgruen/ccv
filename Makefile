@@ -41,6 +41,9 @@ REDSHIFTS=0.24533
 #ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
 ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
 
+### source p(z) definition file for LSS covariance`in nicaea format
+PZFILE=`pwd`/pz.tab
+
 ######## END INSTALLATION INSTRUCTIONS ########
 
 VERSION=0.2
@@ -49,13 +52,13 @@ all: software lut templates model
 
 ##### all
 
-software: lut_software template_software model_software tinker			# programs to calculate covariances
+software: lut_software template_software model_software tinker nicaea			# programs to calculate covariances
 
-lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles		# look-up tables
+lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell				# templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell					# templates for intrinsic covariance components
 
-model: model_corrh model_conc model_ell						# co-added and resampled temples according to some binning scheme
+model: model_corrh model_conc model_ell							# co-added and resampled temples according to some binning scheme
 
 
 #### software
@@ -71,6 +74,12 @@ tinker: src/mktinkerconf
 
 src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 	$(CPP) -o src/mktinkerconf src/mktinkerconf.cpp	
+
+nicaea: src/mknicaeaconf
+	$(MAKE) -C src/nicaea_2.5/Demo
+
+src/mknicaeaconf: src/mknicaeaconf.cpp src/cosmology.h
+	$(CPP) -o src/mknicaeaconf src/mknicaeaconf.cpp	
 
 #### lut
 
@@ -98,6 +107,14 @@ lut_rho0:
 
 lut_profiles:
 	@echo "don't know how to make lut_profiles, but will ignore that"
+
+lut/Pkappa.tab:
+	./src/mknicaeaconf $(PZFILE)
+	cp src/nicaea_2.5/Demo/pkappa .
+	cp src/nicaea_2.5/Demo/cosmo_lens.par .
+	./pkappa
+	grep -v "#" P_kappa > lut/Pkappa.tab
+	rm -f lensingdemo cosmo_lens.par cosmo.par nofz.par P_kappa
 
 
 ### lut_software

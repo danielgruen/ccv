@@ -22,8 +22,8 @@
 #define TH_FAC  1.1
 #define NTHETA  71
 #define ELL_MIN 0.01
-#define ELL_MAX 10000.0
-#define NELL    50
+#define ELL_MAX 100000.0
+#define NELL    1001
 void usage(int ex)
 {
    fprintf(stderr, "Usage: lensingdemo [OPTIONS]\n");
