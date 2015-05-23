@@ -33,6 +33,8 @@ REDSHIFTS=0.24533
 #REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
 # grid from 0.15 to 0.6
 
+REDSHIFTS=0.15 0.6
+
 # you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
 
 ### annuli definition file
@@ -149,7 +151,7 @@ src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_co
 	$(CPP) -fopenmp src/template_corrh_combine.cpp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS)
 
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
-	$(CPP) -fopenmp src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
+	$(CPP) -g src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
 
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 

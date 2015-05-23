@@ -7,6 +7,7 @@ then
 fi
 
 mkdir -p pub
+mkdir -p templates/conc
 
 if [ ! -s templates/conc/cov_100.fits ]
 then
