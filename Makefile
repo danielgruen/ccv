@@ -150,11 +150,7 @@ src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_co
 	$(CPP) -fopenmp src/template_corrh_combine.cpp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS)
 
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
-<<<<<<< HEAD
 	$(CPP) -fopenmp src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
-=======
-	$(CPP) -g src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
->>>>>>> 9a2ae9acb252d0d86dca417cc50eca9cf3f13cde
 
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
@@ -189,11 +185,9 @@ src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.
 	$(CPP) -fopenmp src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_conc_g: src/resample_conc_g.cpp src/conc/template_conc.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
-<<<<<<< HEAD
+
 src/resample_conc_gamma: src/resample_conc_gamma.cpp src/conc/template_conc.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_conc_gamma.cpp -o src/resample_conc_gamma $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
-=======
->>>>>>> 9a2ae9acb252d0d86dca417cc50eca9cf3f13cde
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
