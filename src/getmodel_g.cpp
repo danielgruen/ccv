@@ -22,11 +22,7 @@ int main(int argc, char **argv)
 	if(argc>5) cconc = atof(argv[5]);
 	double ccorr = 5.;
 	if(argc>6) ccorr = atof(argv[6]);
-<<<<<<< HEAD
-	double cell  = 1.;
-=======
 	double cell  = 3.7;
->>>>>>> 9a2ae9acb252d0d86dca417cc50eca9cf3f13cde
 	if(argc>7) cell  = atof(argv[7]);
 
 	cerr << "# calculating intrinsic covariance for M200m=" << m200m << "h^-1 Msol, z=" << zlens << endl;
