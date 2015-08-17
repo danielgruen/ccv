@@ -1,10 +1,13 @@
-#include "conc/template_conc.h"
-
 #include "enfw/enfw.h"
 
 #include <CCfits/CCfits>
 using namespace CCfits;
 
+#include "conc/template_conc.h"
+  
+double Tmean[nv];	// mean of Sigma[v]
+double Tbuf[nv];	// buffer of Sigma[v]
+double Tprod[nv][nv]; // mean product of Sigma[v_i][v_j]
 
 int main(int argc, char **argv)
 {
@@ -34,9 +37,6 @@ int main(int argc, char **argv)
   double c200m=atof(argv[1]);
   // concentration
   
-  double Tmean[nv];	// mean of Sigma[v]
-  double Tbuf[nv];	// buffer of Sigma[v]
-  double Tprod[nv][nv]; // mean product of Sigma[v_i][v_j]
   
   for(int i=0; i<nv; i++)
   {

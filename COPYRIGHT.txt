@@ -1,7 +1,8 @@
-This software contains code downloaded from 
+This software repository contains code downloaded from 
 * http://background.uchicago.edu/~whu/transfer/power.c (see src/cosmology.h)
 * http://kipac.stanford.edu/collab/research/lensing/ample/ample.c (see src/profile/profile.h)
 * http://cosmo.nyu.edu/~tinker/massfunction/MF_code.tar (see src/tinker)
+* http://www.cosmostat.org/software/nicaea/ (see src/nicaea_2.5)
 whose copyright belongs to the respective authors.
 
 The remaining code is provided under the MIT License (MIT).
