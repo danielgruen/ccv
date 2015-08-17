@@ -25,22 +25,25 @@ CORES=1
 
 ### this is the list of redshifts for which the model should be prepared
 # PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
-REDSHIFTS=0.24533 
-#0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 
+REDSHIFTS=0.24533 0.5 
+# snapshots used in the paper
 
-# REDSHIFTS TO DO: these are computations in progress, will be put online as soon as they're finished
-# 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6
+#REDSHIFTS=0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 
+# CLASH
+
+#REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
+# grid from 0.15 to 0.6
 
 # you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
 
 ### annuli definition file according to what you sent me
-### simple format with N_annuli in the first line and then one line of theta_min theta_max each
-#ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
-ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
+### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
+ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
+#ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
 
 ######## END INSTALLATION INSTRUCTIONS ########
 
-VERSION=0.1
+VERSION=0.2
 
 all: software lut templates model
 
@@ -164,6 +167,8 @@ src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.
 	$(CPP) -fopenmp src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_conc_g: src/resample_conc_g.cpp src/conc/template_conc.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_conc_gamma: src/resample_conc_gamma.cpp src/conc/template_conc.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_conc_gamma.cpp -o src/resample_conc_gamma $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
@@ -180,9 +185,15 @@ src/getmodel_g: src/getmodel_g.cpp src/model/covariance.h src/cosmology.h src/en
 src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 	$(CPP) -fopenmp -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
 
+#### clean: re-compile software afterwards
+
+clean:
+	rm -f src/filter/filter.o src/getmodel_g src/getmodel src/resample_corrh_g src/resample_corrh src/resample_conc_g src/resample_conc src/resample_ell_g src/resample_ell src/template_ell src/template_conc src/template_corrh src/template_corrh_combine
+	$(MAKE) clean -C src/tinker
+
 #### forget about model (and re-do later, e.g. if you have changed your annuli definition)
 
-forget_model:
+clean_model:
 	rm -rf model/*
 
 #### pack templates and make available online (to be run by Daniel...)
