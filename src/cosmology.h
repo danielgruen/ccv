@@ -851,4 +851,74 @@ namespace halomodel {
 }
 
 
+namespace Pkappa {
+  
+ static double *logl=0;
+ static double *logPkappa=0;
+ 
+ static double alphalarge; // power-law slope at large l
+ static double alphasmall; // power-law slope at large l
+ 
+ const double loglmin= -2.;
+ const double loglmax=  5.;
+ const int nsteps=1002;
+ const double loglstep=(loglmax-loglmin)/double(nsteps-1);
+ 
+ static bool initialized=false;
+ 
+ void initialize (std::string filename="lut/Pkappa.tab")
+ {
+
+  std::ifstream in(filename.c_str());
+  assert(in.is_open());
+  
+  // read
+  
+  if(logl) delete []logl;
+  if(logPkappa) delete []logPkappa;
+  
+  logl = new double[nsteps];
+  logPkappa = new double[nsteps];
+  
+  for(int i=0; i<nsteps; i++) {
+    assert(in.eof()==0);
+    in >> logl[i] >> logPkappa[i];
+    assert(logl[i]>0);
+    assert(logPkappa[i]>0);
+    logl[i] = log10(logl[i]);
+    logPkappa[i] = log10(logPkappa[i]);
+  }
+  std::string buf;
+  in>>buf;
+  assert(in.eof());
+  
+  alphalarge=(logPkappa[nsteps-1]-logPkappa[nsteps-6])/5.;
+  alphasmall=(logPkappa[5]-logPkappa[0])/5.;
+  
+  assert(alphalarge<0);
+  assert(alphasmall>0);
+  
+  initialized=true;
+ }
+ 
+ double logPkappalog(double log10l)
+ // argument and return value are log10
+ {
+   assert(initialized);
+     
+   double n=(log10l-loglmin)/loglstep;
+   if(n>0 && n<nsteps-1) { // linear interpolation in log theta
+     return logPkappa[int(n)]*(1.-n+int(n))+logPkappa[int(n)+1]*(n-int(n));
+   }
+   
+   // power-law extrapolate to really large and really small l
+   else if(n<=0)
+     return logPkappa[0]+alphasmall*n;
+   else if(n>=nsteps-1) 
+     return logPkappa[nsteps-1]+alphalarge*(n-nsteps+1.);
+ }
+  
+}
+
+
 #endif
