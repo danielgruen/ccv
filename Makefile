@@ -1,8 +1,10 @@
-INCLUDES=-I ~/werc3/include 
-LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits
+INCLUDES=-I ~/include 
+LIBFLAGS=-L ~/lib -lCCfits -lcfitsio
 CPP=g++
-CORES=47
-REDSHIFTS=0.24533 0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686
+CORES=4
+#47
+REDSHIFTS=0.24533 
+#0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686
 ANNULI=annuli_keiichi.tab
 
 LIBFLAGS_TMV=-ltmv -lblas -lpthread -ltmv_symband
