@@ -29,6 +29,8 @@ int main(int argc, char **argv)
    cout << "syntax: " << argv[0] << " [c200m] [output filename]" << endl;
    return 1;
   }
+
+  omp_set_num_threads(1);
     
   FITS *pFits = 0; 
   long naxis    =   2;      

@@ -3,7 +3,7 @@
 
 #include "../cosmology.h"
 #include <complex.h>
-
+#undef complex
 
 double b_nfw(double c200m)
 {

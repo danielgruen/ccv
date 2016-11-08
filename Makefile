@@ -1,33 +1,73 @@
-INCLUDES=-I ~/include 
-LIBFLAGS=-L ~/lib -lCCfits -lcfitsio
+######## INSTALLATION INSTRUCTIONS ########
+#### (0) Make sure that you have all necessary libraries / software installed, including
+####     -- the tmv-cpp library, http://tmv-cpp.googlecode.com/
+####     -- the CCfits library, http://heasarc.gsfc.nasa.gov/fitsio/CCfits/
+####     -- curl for some automated downloading of templates
+#### (1) Edit the following lines to match your system / preferences
+#### (2) Run 'make' 
+####     -- This should compile all code needed to produce / handle the model.
+####     -- This should also download a bunch of pre-computed files from my system.
+####        If you are asking for the model at a redshift that I haven't pre-computed, it should 
+####        automatically do the calculation for you (but it may take several processor-days)
+#### (3) You can get the covariance of kappa in your selected set of annuli for any combination
+####     of redshift and mass by running ./src/getmodel, which outputs a fits file.
+####     See ./src/getmodel.cpp for how to handle this in c++ directly.
+####     The analogous covariance matrix for gamma is output by ./src/getmodel_g
+
+### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
-CORES=4
-#47
+INCLUDES=-I ~/werc3/include 
+LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
+LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
+LIBFLAGS_GSL=`gsl-config --libs`
+
+### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
+CORES=1
+
+### this is the list of redshifts for which the model should be prepared
+# PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
 REDSHIFTS=0.24533 
-#0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686
-ANNULI=annuli_keiichi.tab
+# primary snapshots used in the paper
 
-LIBFLAGS_TMV=-ltmv -lblas -lpthread -ltmv_symband
+#REDSHIFTS=0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 
+# CLASH
 
+#REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
+# grid from 0.15 to 0.6
+
+# you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
+
+### annuli definition file
+### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
+### after you have run make, if you want to change your annuli definition, run 'make clean_model' and 'make' again
+#ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
+ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
+
+### source p(z) definition file for LSS covariance`in nicaea format
+PZFILE=`pwd`/pz.tab
+
+######## END INSTALLATION INSTRUCTIONS ########
+
+VERSION=0.2
 
 all: software lut templates model
 
 ##### all
 
-software: lut_software template_software model_software tinker			# programs to calculate covariances
+software: lut_software template_software model_software tinker nicaea			# programs to calculate covariances
 
-lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles		# look-up tables
+lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell				# templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell template_lss			# templates for intrinsic covariance components
 
-model: model_corrh model_conc model_ell						# co-added and resampled temples according to some binning scheme
+model: model_corrh model_conc model_ell							# co-added and resampled temples according to some binning scheme
 
 
 #### software
 
-template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell
+template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell src/template_lss
 
-model_software: src/resample_ell src/resample_conc src/resample_corrh
+model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g
 
 lut_software: src/calc_W 
 
@@ -36,6 +76,12 @@ tinker: src/mktinkerconf
 
 src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 	$(CPP) -o src/mktinkerconf src/mktinkerconf.cpp	
+
+nicaea: src/mknicaeaconf
+	$(MAKE) -C src/nicaea_2.5/Demo
+
+src/mknicaeaconf: src/mknicaeaconf.cpp src/cosmology.h
+	$(CPP) -o src/mknicaeaconf src/mknicaeaconf.cpp	
 
 #### lut
 
@@ -64,6 +110,14 @@ lut_rho0:
 lut_profiles:
 	@echo "don't know how to make lut_profiles, but will ignore that"
 
+lut/Pkappa.tab:
+	./src/mknicaeaconf $(PZFILE)
+	cp src/nicaea_2.5/Demo/pkappa .
+	cp src/nicaea_2.5/Demo/cosmo_lens.par .
+	./pkappa
+	grep -v "#" P_kappa > lut/Pkappa.tab
+	rm -f pkappa lensingdemo cosmo_lens.par cosmo.par nofz.par P_kappa
+
 
 ### lut_software
 
@@ -88,19 +142,26 @@ templates_ell:
 	bash helpers/templates_ell.sh $(CORES)
 	@echo "========== finished with ell templates =========="
 
+template_lss:
+	@echo "don't know how to make template_lss, but will ignore that"
+
 ### template_software
 
 src/template_corrh: src/template_corrh.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp -o src/template_corrh $(INCLUDES) $(LIBFLAGS) src/template_corrh.cpp
+	$(CPP) -fopenmp src/template_corrh.cpp -o src/template_corrh $(INCLUDES) $(LIBFLAGS) 
 
 src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS) src/template_corrh_combine.cpp
+	$(CPP) -fopenmp src/template_corrh_combine.cpp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS)
 
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
-	$(CPP) -fopenmp -o src/template_conc $(INCLUDES) $(LIBFLAGS) src/template_conc.cpp
-
+	$(CPP) -fopenmp src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
+ 
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
-	$(CPP) -fopenmp -o src/template_ell $(INCLUDES) $(LIBFLAGS) src/template_ell.cpp src/filter/filter.o
+	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
+
+src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -fopenmp src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
+
 
 
 #### model
@@ -124,19 +185,57 @@ model_ell:
 ### model software
 
 src/resample_ell: src/resample_ell.cpp src/enfw/template_ell.h src/cosmology.h
-	$(CPP) -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_ell.cpp
+	$(CPP) -fopenmp src/resample_ell.cpp -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_ell_g: src/resample_ell_g.cpp src/enfw/template_ell.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_ell_g.cpp -o src/resample_ell_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.h
-	$(CPP) -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_conc.cpp
+	$(CPP) -fopenmp src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_conc_g: src/resample_conc_g.cpp src/conc/template_conc.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+
+src/resample_conc_gamma: src/resample_conc_gamma.cpp src/conc/template_conc.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_conc_gamma.cpp -o src/resample_conc_gamma $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
-	$(CPP) -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/resample_corrh.cpp
+	$(CPP) -fopenmp src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_corrh_g: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_corrh_g.cpp -o src/resample_corrh_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
-	$(CPP) -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV) src/getmodel.cpp
+	$(CPP) -fopenmp src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/getmodel_g: src/getmodel_g.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+	$(CPP) -fopenmp src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 ### filter library
 
 src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 	$(CPP) -fopenmp -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
 
+#### clean: re-compile software afterwards
+
+clean:
+	rm -f src/filter/filter.o src/getmodel_g src/getmodel src/resample_corrh_g src/resample_corrh src/resample_conc_g src/resample_conc src/resample_ell_g src/resample_ell src/template_ell src/template_conc src/template_corrh src/template_corrh_combine
+	$(MAKE) clean -C src/tinker
+
+#### forget about model (and re-do later, e.g. if you have changed your annuli definition)
+
+clean_model:
+	rm -rf model/*
+
+#### pack templates and make available online (to be run by Daniel...)
+
+pub: pub/templates_conc.tar.gz pub/templates_ell.tar.gz pub/ccv.tar.gz
+	rsync -avv pub/templates_conc.tar.gz pub/templates_ell.tar.gz templates/corrh_*fits lut/W*tab lut/dndM*tab dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/templates/
+	rsync -avv pub/ccv-$(VERSION).tar.gz dgruen@moon.usm.uni-muenchen.de:/usr/web/users/dgruen/public_html/code/
+
+pub/templates_conc.tar.gz: templates/conc/cov_100.fits
+	tar czf pub/templates_conc.tar.gz templates/conc/*.fits
+
+pub/templates_ell.tar.gz: templates/ell/cov_100.fits
+	tar czf pub/templates_ell.tar.gz templates/ell/*.fits
+
+pub/ccv.tar.gz:
+	-git commit -a
+	bash helpers/pack_software.sh $(VERSION)
+	

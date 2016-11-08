@@ -8,9 +8,10 @@ fi
 
 
 mkdir -p model/conc
+mkdir -p model/gamma/conc
 n=0
 
-annuli=${@: -2}
+annuli="${@:(-2):1}"
 cores=${@: -1}
 
 while test ${#} -gt 2
@@ -23,7 +24,16 @@ do
     if [ ! -s model/conc/conc_m${m}_${zlong}.fits ]
     then
       rm -f model/conc/conc_m${m}_${zlong}.fits
+      echo ./src/resample_conc $1 $annuli $m model/conc/conc_m${m}_${zlong}.fits 
       ./src/resample_conc $1 $annuli $m model/conc/conc_m${m}_${zlong}.fits &
+      n=`expr $n + 1`
+    fi
+
+    if [ ! -s model/gamma/conc/conc_m${m}_${zlong}.fits ]
+    then
+      rm -f model/gamma/conc/conc_m${m}_${zlong}.fits
+      echo ./src/resample_conc_g $1 $annuli $m model/gamma/conc/conc_m${m}_${zlong}.fits
+      ./src/resample_conc_g $1 $annuli $m model/gamma/conc/conc_m${m}_${zlong}.fits &
       n=`expr $n + 1`
     fi
 

@@ -7,9 +7,10 @@ then
 fi
 
 mkdir -p model/ell
+mkdir -p model/gamma/ell
 n=0
 
-annuli=${@: -2}
+annuli="${@:(-2):1}"
 cores=${@: -1}
 
 while test ${#} -gt 2
@@ -22,7 +23,13 @@ do
     if [ ! -s model/ell/ell_m${m}_${zlong}.fits ]
     then
       rm -f model/ell/ell_m${m}_${zlong}.fits
-      ./src/resample_ell $1 $2 $m model/ell/ell_m${m}_${zlong}.fits &
+      ./src/resample_ell $1 $annuli $m model/ell/ell_m${m}_${zlong}.fits &
+      n=`expr $n + 1`
+    fi
+    if [ ! -s model/gamma/ell/ell_m${m}_${zlong}.fits ]
+    then
+      rm -f model/gamma/ell/ell_m${m}_${zlong}.fits
+      ./src/resample_ell_g $1 $annuli $m model/gamma/ell/ell_m${m}_${zlong}.fits &
       n=`expr $n + 1`
     fi
 
