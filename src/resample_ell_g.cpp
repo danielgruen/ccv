@@ -114,7 +114,7 @@ int main(int argc, char **argv)
     
   // (4) read in some covariance matrix
   
-  Matrix<double> covhatg(nv+1,nv+1);
+  Matrix<double> covhatg(nv+1,nv+1); // use last element for inner circle
   
   {
     std::ostringstream ss;

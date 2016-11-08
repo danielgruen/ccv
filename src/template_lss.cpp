@@ -363,6 +363,6 @@ int main(int argc, char **argv)
   
   pFits->pHDU().write(1,rsteps*rsteps,image);
     
-    return 0;
+  return 0;
 }
 

@@ -16,13 +16,13 @@
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
-INCLUDES=-I ~/werc3/include 
-LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
+INCLUDES=-I ~/include 
+LIBFLAGS=-L ~/lib -lCCfits -lcfitsio
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs`
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=1
+CORES=7
 
 ### this is the list of redshifts for which the model should be prepared
 # PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
@@ -58,16 +58,16 @@ software: lut_software template_software model_software tinker nicaea			# progra
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell template_lss			# templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell templates_off template_lss       # templates for intrinsic covariance components
 
 model: model_corrh model_conc model_ell							# co-added and resampled temples according to some binning scheme
 
 
 #### software
 
-template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell src/template_lss
+template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell src/template_off src/template_lss
 
-model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g
+model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g src/getmodel_ds
 
 lut_software: src/calc_W 
 
@@ -142,6 +142,12 @@ templates_ell:
 	bash helpers/templates_ell.sh $(CORES)
 	@echo "========== finished with ell templates =========="
 
+templates_off:
+	@echo "========== checking for availability of off templates =========="
+	bash helpers/templates_off.sh $(CORES)
+	@echo "========== finished with ell templates =========="
+
+
 template_lss:
 	@echo "don't know how to make template_lss, but will ignore that"
 
@@ -158,6 +164,9 @@ src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.
  
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
+ 
+src/template_off: src/template_off.cpp src/off/template_off.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
+	$(CPP) -fopenmp src/template_off.cpp src/filter/filter.o -o src/template_off $(INCLUDES) $(LIBFLAGS) 
 
 src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP) -fopenmp src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
@@ -206,6 +215,8 @@ src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/e
 	$(CPP) -fopenmp src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/getmodel_g: src/getmodel_g.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
 	$(CPP) -fopenmp src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/getmodel_ds: src/getmodel_ds.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+	$(CPP) -fopenmp src/getmodel_ds.cpp -o src/getmodel_ds $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 ### filter library
 
