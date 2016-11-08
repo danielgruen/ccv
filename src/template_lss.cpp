@@ -43,9 +43,9 @@ double J1_large(double x)
 const double lmin=1.e-5;          // lower limit for l integration
 const double lmax=1.e7;           // upper limit for l integration
 const double loglmin=log10(lmin);
-const int nsinsteps=2000;              // this many integrations steps for one period in kr of the sin(kr)*k^alpha or this many integration steps for a k interval, whichever is smaller
+const int nsinsteps=360;              // this many integrations steps for one period in kr of the sin(kr)*k^alpha or this many integration steps for a k interval, whichever is smaller
 const double radmax=2.*M_PI/nsinsteps; // max d(angle [rad]) for integration of trig fn
-const double lfac=1.01;              // multiplicative factor in l in first integral
+const double lfac=1.02;              // multiplicative factor in l in first integral
 const double lnlfacinv=log(1./lfac);
 
 
@@ -166,13 +166,14 @@ double plci_periods(double Pkk0, double k0, double alpha, double r, int nperiods
 
 int main(int argc, char **argv)
 {
-    if(argc!=5)
+    if(argc!=3)
     {
-     cout << "syntax: " << argv[0] << " [Pkappa file] [FITS output] [zmax] [zmin]" << endl;  
+     cout << "syntax: " << argv[0] << " [Pkappa file] [FITS output]" << endl; 
+     return 1; 
     }
     
     clear_cov();
-    Pkappa::initialize(argv[1],1,atof(argv[3]),atof(argv[4]));
+    Pkappa::initialize(argv[1]);
 
 #pragma omp parallel for schedule(dynamic)
     for(int ilta=0; ilta<rsteps; ilta++)

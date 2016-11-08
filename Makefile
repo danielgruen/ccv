@@ -19,9 +19,10 @@ CPP=g++
 INCLUDES=-I ~/werc3/include 
 LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
+LIBFLAGS_GSL=`gsl-config --libs`
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=48
+CORES=1
 
 ### this is the list of redshifts for which the model should be prepared
 # PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
@@ -57,14 +58,14 @@ software: lut_software template_software model_software tinker nicaea			# progra
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell					# templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell template_lss			# templates for intrinsic covariance components
 
 model: model_corrh model_conc model_ell							# co-added and resampled temples according to some binning scheme
 
 
 #### software
 
-template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell
+template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell src/template_lss
 
 model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g
 
@@ -115,7 +116,7 @@ lut/Pkappa.tab:
 	cp src/nicaea_2.5/Demo/cosmo_lens.par .
 	./pkappa
 	grep -v "#" P_kappa > lut/Pkappa.tab
-	rm -f lensingdemo cosmo_lens.par cosmo.par nofz.par P_kappa
+	rm -f pkappa lensingdemo cosmo_lens.par cosmo.par nofz.par P_kappa
 
 
 ### lut_software
@@ -141,6 +142,9 @@ templates_ell:
 	bash helpers/templates_ell.sh $(CORES)
 	@echo "========== finished with ell templates =========="
 
+template_lss:
+	@echo "don't know how to make template_lss, but will ignore that"
+
 ### template_software
 
 src/template_corrh: src/template_corrh.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
@@ -151,9 +155,13 @@ src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_co
 
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
 	$(CPP) -fopenmp src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
-
+ 
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
+
+src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -fopenmp src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
+
 
 
 #### model
