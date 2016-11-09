@@ -1,9 +1,8 @@
-// compress an angular covariance matrix (corrh, lss) to the system of annuli used in the analysis, tranform to gamma
+// compress an covariance matrix (off) to the system of annuli used
 
 #include <assert.h>
 #include "cosmology.h"
-#include "corrh/template_corrh.h"
-
+#include "off/template_off.h"
 #include <TMV.h>
 #include <iostream>
 
@@ -14,20 +13,26 @@ using namespace tmv;
 
 using namespace CCfits;
 
-#include <fstream>
 
 int main(int argc, char **argv)
 {
 
-  if(argc!=4)
+  if(argc!=5)
   {
-   cout << "syntax: " << argv[0] << " [annulus definition file] [source] [destination]" << endl;
-   return 0;
+   cout << "syntax: " << argv[0] << " [zlens] [annulus definition file] [logM*100] [destination]" << endl;
+   return 1;
   }
 
-  ifstream ann(argv[1]);
-  int Nb; ann >> Nb;
+  double zlens=atof(argv[1]);
+  assert (zlens>0.);
+  double DLen = angularDiameterDistance(0,zlens,10000)*h; // hinv Mpc per rad
 
+
+  // (1) generate annulus structure
+   
+  ifstream ann(argv[2]);
+  int Nb; ann >> Nb;
+  
   double rmin[Nb];
   double rmax[Nb];
 
@@ -53,34 +58,39 @@ int main(int argc, char **argv)
 
   // (3) create conversion matrix from one set of annuli to the other
   
-  // Nb is set to the final number of bins now, rmin and rmax contain their minimum and maximum radii
+  double m200m=pow10(atof(argv[3])/100.); // hinv Msol
+  double c200m=halomodel::cmz_200m_duffy(m200m,zlens); // assume Duffy here, need to scale covariance to angles correctly
+  double rs_mpc=halomodel::r200mRadius(m200m/h, zlens)*h/c200m; // [Mpc]
+  double rs=rs_mpc/DLen*arcminperrad; // arcmin
+  
+  
+  
+  double rhatmin[nv];
+  double rhatmax[nv];
 
-  double rhatmin[rsteps];
-  double rhatmax[rsteps];
-  rhatmin[0]=thetamin;
-  rhatmax[0]=rhatmin[0]*rfactor;
-  for(int j=1; j<rsteps; j++) 
+  rhatmin[0]=pow10(vmin)*rs;
+  rhatmax[0]=rhatmin[0]*vfac;
+
+  for(int j=1; j<nv; j++)
   {
     rhatmin[j]=rhatmax[j-1];
-    rhatmax[j]=rhatmin[j]*rfactor;
+    rhatmax[j]=rhatmin[j]*vfac;
+  }
+  
+  double rhatmin2[nv];
+  double rhatmax2[nv];
+  double rhatmean[nv];
+  for(int j=0; j<nv; j++)
+  {
     rhatmin2[j]=rhatmin[j]*rhatmin[j];
     rhatmax2[j]=rhatmax[j]*rhatmax[j];
     rhatmean[j]=2.*(pow(rhatmax[j],3)-pow(rhatmin[j],3)) / (3.*(pow(rhatmax[j],2)-pow(rhatmin[j],2)));
   }
   
-  double rhatmin2[rsteps];
-  double rhatmax2[rsteps];
-  double rhatmean[rsteps];
-  for(int j=0; j<rsteps; j++) 
-  {
-    rhatmin2[j]=rhatmin[j]*rhatmin[j];
-    rhatmax2[j]=rhatmax[j]*rhatmax[j];
-    rhatmean[j]=2.*(pow(rhatmax[j],3)-pow(rhatmin[j],3)) / (3.*(pow(rhatmax[j],2)-pow(rhatmin[j],2)));
-  }  
-  
-  Matrix<double> Agamma(Nb,rsteps+1);
+  Matrix<double> Agamma(Nb,nv+1);
+  Agamma.setZero();
 
-  cout << "# input covariance matrix: " << rsteps << " bins from " << rhatmin[0] << " to " << rhatmax[rsteps-1] << " arcmin" << endl;
+  cout << "# input covariance matrix: " << nv << " bins from " << rhatmin[0] << " to " << rhatmax[nv-1] << " arcmin" << endl;
   cout << "# output covariance matrix: " << Nb << " bins from " << rmin[0] << " to " << rmax[Nb-1] << " arcmin" << endl;
   
   // gamma = Agamma kappahat'
@@ -98,32 +108,40 @@ int main(int argc, char **argv)
      Agamma(i,J) /= rhatmax2[j-1]; 
      //sum += Agamma(i,J);
     }
-    Agamma(i,rsteps) = rhatmin2[0]/rhatmax2[j];
-    //sum += Agamma(i,rsteps);
+    Agamma(i,nv) = rhatmin2[0]/rhatmax2[j];
+    //sum += Agamma(i,nv);
     
     Agamma(i,j) = -1.; // -kappa(theta)
     
     //cout << i << " " << sum << endl;
   }
+    
+  // (4) find matching version of sigma_R in units of r_s
+  double sigma_r=sigma_r_of_m200m(m200m); // [Mpc] Rykoff+2016
+  int nc = int(sigma_r/rs_mpc*100.+0.5);
+  cout << "using sigma_r=" << sigma_r << " Mpc ~ " << nc/100. << " r_s" << endl;
+    
+  // (5) read in some covariance matrix
   
-  // (4) read in some covariance matrix
-  
-  Matrix<double> covhatg(rsteps+1,rsteps+1);
+  Matrix<double> covhatg(nv+1,nv+1);
   
   {
-    auto_ptr<FITS> pInfile(new FITS(argv[2],Read,true));
+    std::ostringstream ss;
+    ss << nc;
+    cout << "opening templates/off/cov_"+ss.str()+".fits" << endl;
+    auto_ptr<FITS> pInfile(new FITS("templates/off/cov_"+ss.str()+".fits",Read,true));
     PHDU& image = pInfile->pHDU(); 
     valarray<double>  contents;      
     image.read(contents);
     long ax1(image.axis(0));
     long ax2(image.axis(1));
     
-    assert(ax1==rsteps);
-    assert(ax2==rsteps);
+    assert(ax1==nv);
+    assert(ax2==nv);
     
     int idx=0;
-    for(int i=0; i<rsteps; i++)
-      for(int j=0; j<rsteps; j++)
+    for(int i=0; i<nv; i++)
+      for(int j=0; j<nv; j++)
       {
 	covhatg(i,j)=contents[idx];
 	idx++;
@@ -134,17 +152,15 @@ int main(int argc, char **argv)
   // (5) extrapolate covariance to central circle
   
   // most stupid thing: assume it's the same as innermost annulus
-  for(int i=0; i<rsteps; i++)
+  for(int i=0; i<nv; i++)
   {
-   covhatg(i,rsteps) = covhatg(rsteps,i) = covhatg(i,0); 
+   covhatg(i,nv) = covhatg(nv,i) = covhatg(i,0); 
   }
-  covhatg(rsteps,rsteps) = covhatg(0,0);
-  
+  covhatg(nv,nv) = covhatg(0,0);
   
   Matrix<double> cov(Nb,Nb);
   
   cov = Agamma*covhatg*Agamma.transpose();
-  
 
   {
     FITS *pFits = 0; 
@@ -152,7 +168,7 @@ int main(int argc, char **argv)
     long naxes[2] = { Nb, Nb };
     try
     {
-      const std::string fileName(argv[3]);            
+      const std::string fileName(argv[4]);            
       pFits = new FITS(fileName, DOUBLE_IMG , naxis , naxes );
     }
     catch (FITS::CantCreate)

@@ -5,8 +5,8 @@
 int main(int argc, char **argv)
 {
 
-	if(argc < 3 || argc > 7 ) {
-		cerr << "syntax: " << argv[0] << " [output filename] [zlens] [M200m/(h_^{-1}Msol)] ([cconc=1] [ccorr=5.0] [cell=3.7])" << endl;
+	if(argc < 3 || argc > 8 ) {
+		cerr << "syntax: " << argv[0] << " [output filename] [zlens] [M200m/(h_^{-1}Msol)] ([cconc=1] [ccorr=5.0] [cell=3.7] [coff=0])" << endl;
 		return 1;
 	}
 
@@ -24,15 +24,18 @@ int main(int argc, char **argv)
 	if(argc>5) ccorr = atof(argv[5]);
 	double cell  = 3.7;
 	if(argc>6) cell  = atof(argv[6]);
+	double coff  = 0.;
+	if(argc>7) coff  = atof(argv[7]);
 
 	cerr << "# calculating intrinsic covariance for M200m=" << m200m << "h^-1 Msol, z=" << zlens << endl;
 
 	// (2) initialize model
 
-	CovarianceModel model(zlens, zsource, log10mass100, log10mass100+1, ccorr, cconc, cell, 0., 0., 
+	CovarianceModel model(zlens, zsource, log10mass100, log10mass100+1, ccorr, cconc, cell, coff, 0., 0., 
 			      "model/gamma/corrh_", // string prefixes of model covariance for gamma
 			      "model/gamma/conc/conc_m",	
-			      "model/gamma/ell/ell_m"); 
+			      "model/gamma/ell/ell_m",	
+			      "model/gamma/off/off_m"); 
 	
         double DLen      = angularDiameterDistance(0,zlens,10000)*h;
         double sigmacrit = ckms*ckms/4./M_PI/Gs*angularDiameterDistance(0,zsource,10000)/DLen/angularDiameterDistance(zlens,zsource,10000); // h Msol / Mpc^2;

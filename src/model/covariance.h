@@ -350,19 +350,20 @@ class CovarianceMassArray : public Covariance {
 class CovarianceModel : public Covariance {
 
   public:
-    CovarianceModel(double dzlens, double dzsource=1.0, 		    // lens and source redshift
+    CovarianceModel(double dzlens, double beta=1.0, 		    	    // lens and source redshift
                     int log10massmin100=1300, int log10massmax100=1600,	    // minimum and maximum log10(M200m/[h^-1Msol])*100
 		    double dccorr=5.0, double dcconc=1.0, double dcell=3.7, // semi-analytic re-scaling factors
+		    double dcoff=0.0,
                     double dccorr1=0., double dcell1=0.,		    // nu dependence of re-scaling factors
                     string scorr="model/corrh_", 			    // string prefixes of model covariance
                     string sconc="model/conc/conc_m",	
-                    string  sell="model/ell/ell_m"
+                    string  sell="model/ell/ell_m",	
+                    string  soff="model/off/off_m"
                    ) :
-                   zlens(dzlens), zsource(dzsource), ccorr(dccorr), cconc(dcconc), cell(dcell), ccorr1(dccorr1), cell1(dcell1)
+                   zlens(dzlens), ccorr(dccorr), cconc(dcconc), cell(dcell), ccorr1(dccorr1), cell1(dcell1), coff(dcoff)
     {
-	    
-        DLen      = angularDiameterDistance(0,zlens,10000)*h;
-        sigmacrit = ckms*ckms/4./M_PI/Gs*angularDiameterDistance(0,zsource,10000)/DLen/angularDiameterDistance(zlens,zsource,10000); // h Msol / Mpc^2;
+        double DLen=angularDiameterDistance(0,dzlens,1000);
+        sigmacrit = ckms*ckms/4./M_PI/Gs/beta/DLen; // h Msol / Mpc^2;
 
 	// (1) correlated haloes; mass dependence comes from bias of cluster halo only
         stringstream ss;
@@ -378,11 +379,15 @@ class CovarianceModel : public Covariance {
 	// (4) halo ellipticity
 	Cell  = new CovarianceMassArray(sell, zlens, log10massmin100, log10massmax100, 1);
         Cell->rescaleCovariance(rescaleCell, zlens, sigmacrit, DLen);
+	
+	// (4) off-centring
+	Coff  = new CovarianceMassArray(soff, zlens, log10massmin100, log10massmax100, 1);
+        Coff->rescaleCovariance(rescaleCoff, zlens, sigmacrit, DLen);
     }
 
     ~CovarianceModel() 
     {
-      delete Ccorr; delete Cconc; delete Cell;
+      delete Ccorr; delete Cconc; delete Cell; delete Coff;
     }
      
     void project(const MatrixView<double> P)
@@ -392,6 +397,7 @@ class CovarianceModel : public Covariance {
       if(Ccorr)  Ccorr->project(P);
       if(Cconc)  Cconc->project(P);
       if(Cell)   Cell->project(P);
+      if(Coff)   Coff->project(P);
     }
    
     static double rescaleCconc(double m200m, double Szlens, double Ssigmacrit, double SDLen) 
@@ -407,51 +413,62 @@ class CovarianceModel : public Covariance {
       double c200m = halomodel::cmz_200m_duffy(m200m,Szlens);
       return pow(nfw_rho0_200m(c200m, Szlens)/h/h * r200m/c200m *SDLen*radperarcmin / Ssigmacrit,2);
     }
+    static double rescaleCoff(double m200m, double Szlens, double Ssigmacrit, double SDLen) 
+    // re-scaling of FITSCovarianceMatrix for off-centring at m200m [hinv Msol]
+    {
+      double r200m = halomodel::r200mRadius(m200m/h, Szlens)*h/SDLen*arcminperrad; // arcmin
+      double c200m = halomodel::cmz_200m_duffy(m200m,Szlens);
+      double rho0 = nfw_rho0_200m(c200m, 0.)/h/h; // h^2 Msol/R_S[Mpc]^3
+      return pow(rho0/c200m*pow(1.+Szlens,3)*r200m*SDLen*radperarcmin / Ssigmacrit,2);
+    }
  
     SymMatrix<double> cov(CovarianceParameters &p)
     {
-     return   max(0,ccorr+ccorr1*(p.nu-2.5))*p.bias*Ccorr->cov() +
+      return  max(0,ccorr+ccorr1*(p.nu-2.5))*p.bias*Ccorr->cov() +
               cconc*Cconc->cov(p) +
-              max(0,cell+cell1*(p.nu-2.8))*Cell->cov(p);
+              max(0,cell+cell1*(p.nu-2.8))*Cell->cov(p) +
+	      coff*Coff->cov(p);
     }
 
     DiagMatrix<double> covDiag(CovarianceParameters &p)
     {
-     return   max(0,ccorr+ccorr1*(p.nu-2.5))*p.bias*Ccorr->covDiag() +
+      return  max(0,ccorr+ccorr1*(p.nu-2.5))*p.bias*Ccorr->covDiag() +
               cconc*Cconc->covDiag(p) +
-              max(0,cell+cell1*(p.nu-2.8))*Cell->covDiag(p);
+              max(0,cell+cell1*(p.nu-2.8))*Cell->covDiag(p) +
+              coff*Coff->covDiag(p);
     }
     
     Vector<double> var(CovarianceParameters &p)
     {
-     return   max(0,ccorr+ccorr1*(p.nu-2.5))*p.bias*Ccorr->var() +
+      return  max(0,ccorr+ccorr1*(p.nu-2.5))*p.bias*Ccorr->var() +
               cconc*Cconc->var(p) +
-              max(0,cell+cell1*(p.nu-2.8))*Cell->var(p);
+              max(0,cell+cell1*(p.nu-2.8))*Cell->var(p) +
+              coff*Coff->var(p);
     }
 
     // convenience
     SymMatrix<double> cov(double m200m) // in units of h^{-1} Msol
     {
-     CovarianceParameters p = covarianceParameters(m200m, zlens);
-     return cov(p);
+      CovarianceParameters p = covarianceParameters(m200m, zlens);
+      return cov(p);
     }
     DiagMatrix<double> covDiag(double m200m) // in units of h^{-1} Msol
     {
-     CovarianceParameters p = covarianceParameters(m200m, zlens);
-     return covDiag(p);
+      CovarianceParameters p = covarianceParameters(m200m, zlens);
+      return covDiag(p);
     }
     Vector<double> var(double m200m) // in units of h^{-1} Msol
     {
-     CovarianceParameters p = covarianceParameters(m200m, zlens);
-     return var(p);
+      CovarianceParameters p = covarianceParameters(m200m, zlens);
+      return var(p);
     }
 
-    double zlens, zsource, DLen, sigmacrit;
-    double ccorr, cconc, cell;
+    double zlens, sigmacrit;
+    double ccorr, cconc, cell, coff;
     double ccorr1, cell1;
 
     FITSCovarianceMatrix *Ccorr;
-    CovarianceMassArray  *Cconc, *Cell;
+    CovarianceMassArray  *Cconc, *Cell, *Coff;
  
 };
 

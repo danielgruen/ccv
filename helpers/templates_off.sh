@@ -28,12 +28,13 @@ mkdir -p templates/off
 
 i=0
 
-for (( ic=50; ic<=200; ic+=1 ))
+for (( ic=1; ic<=200; ic+=1 ))
 do
   if [ ! -s templates/off/cov_${ic}.fits ]
   then
     rm -f templates/off/cov_${ic}.fits
     c=`calc.sh $ic*0.01`
+    echo ./src/template_off $c templates/off/cov_${ic}.fits
     ./src/template_off $c templates/off/cov_${ic}.fits &
     i=`expr $i + 1`
     if [ $i -eq $1 ]

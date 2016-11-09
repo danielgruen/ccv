@@ -332,7 +332,7 @@ int main(int argc, char **argv)
       
       sum += (sum_a+sum_b)/(2.*M_PI*M_PI*sqrt(theta1*theta2));
       
-      cout << thetaa << " " << thetab << " " << sum << endl;
+      //cout << thetaa << " " << thetab << " " << sum << endl;
       cov[ilta][iltb] = cov[iltb][ilta] = sum;
     }
     

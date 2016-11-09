@@ -24,33 +24,38 @@ LIBFLAGS_GSL=`gsl-config --libs`
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
 CORES=7
 
-### this is the list of redshifts for which the model should be prepared
-# PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
-REDSHIFTS=0.24533 
-# primary snapshots used in the paper
+### cluster definition file
+### simple format with one line with ID z_lens p_z_source annuli_prefix for each cluster
+### where ID is some unique string identifier for the cluster, 
+###       z_lens its redshift (choose one between 0.15 and 0.71 with two significant digits to use precomputed templates), 
+###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
+###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
+CLUSTERS=clusters.tab
 
-#REDSHIFTS=0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 
-# CLASH
-
-#REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
-# grid from 0.15 to 0.6
-
-# you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
-
-### annuli definition file
+### annuli definition files:
 ### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
 ### after you have run make, if you want to change your annuli definition, run 'make clean_model' and 'make' again
-#ANNULI=annuli_keiichi.tab  # Keiichi Umetsu's CLASH annuli
-ANNULI=annuli_daniel.tab  # a set of annuli I've used in the paper
 
-### source p(z) definition file for LSS covariance`in nicaea format
-PZFILE=`pwd`/pz.tab
+### redshift distribution files:
+### in nicaea format
 
 ######## END INSTALLATION INSTRUCTIONS ########
 
-VERSION=0.2
+VERSION=0.3
 
-all: software lut templates model
+REDSHIFTS=$(shell cat $(CLUSTERS) | cut -d \  -f 2 | sort | uniq) # a list of redshifts
+PZFILES=$(shell cat $(CLUSTERS) | cut -d \  -f 3 | sort | uniq) # a list of p(z) prefixes
+ANNULI=$(shell cat $(CLUSTERS) | cut -d \  -f 4 | sort | uniq) # a list of annuli prefixes
+
+
+
+
+all: software lut templates model info
+
+info:
+	@echo z=$(REDSHIFTS)
+	@echo pz=$(PZFILES)
+	@echo annuli=$(ANNULI)
 
 ##### all
 
@@ -58,16 +63,16 @@ software: lut_software template_software model_software tinker nicaea			# progra
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell templates_off template_lss       # templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell templates_off template_lss      # templates for intrinsic covariance components
 
-model: model_corrh model_conc model_ell							# co-added and resampled temples according to some binning scheme
+model: model_corrh model_conc model_ell model_off model_lss				# co-added and resampled temples according to some binning scheme
 
 
 #### software
 
 template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell src/template_off src/template_lss
 
-model_software: src/resample_ell src/resample_ell_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g src/getmodel_ds
+model_software: src/resample_ell src/resample_ell_g src/resample_off src/resample_off_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g src/getmodel_ds
 
 lut_software: src/calc_W 
 
@@ -111,13 +116,9 @@ lut_profiles:
 	@echo "don't know how to make lut_profiles, but will ignore that"
 
 lut/Pkappa.tab:
-	./src/mknicaeaconf $(PZFILE)
-	cp src/nicaea_2.5/Demo/pkappa .
-	cp src/nicaea_2.5/Demo/cosmo_lens.par .
-	./pkappa
-	grep -v "#" P_kappa > lut/Pkappa.tab
-	rm -f pkappa lensingdemo cosmo_lens.par cosmo.par nofz.par P_kappa
-
+	@echo "========== checking availability of Pkappa ==========="
+	bash helpers/pkappa.sh $(PZFILES)
+	@echo "========== finished with Pkappa ==========="
 
 ### lut_software
 
@@ -147,9 +148,10 @@ templates_off:
 	bash helpers/templates_off.sh $(CORES)
 	@echo "========== finished with ell templates =========="
 
-
 template_lss:
-	@echo "don't know how to make template_lss, but will ignore that"
+	@echo "========== checking for availability of lss templates =========="
+	bash helpers/templates_lss.sh $(PZFILES)                         
+	@echo "========== finished with lss templates =========="
 
 ### template_software
 
@@ -177,19 +179,33 @@ src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.
 
 model_corrh: 
 	@echo "========== checking for availability of corrh model =========="
-	bash helpers/model_corrh.sh $(REDSHIFTS) $(ANNULI)
+	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 2,4 )) # a list of redshifts and annuli
+	bash helpers/model_corrh.sh $(ARGS)
 	@echo "========== finished with corrh model =========="
 
 model_conc:
 	@echo "========== checking for availability of conc model =========="
-	bash helpers/model_conc.sh $(REDSHIFTS) $(ANNULI) $(CORES)
+	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 2,4 )) # a list of redshifts and annuli
+	bash helpers/model_conc.sh $(ARGS) $(CORES)
 	@echo "========== finished with conc model =========="
 
 model_ell:
 	@echo "========== checking for availability of ell model =========="
-	bash helpers/model_ell.sh $(REDSHIFTS) $(ANNULI) $(CORES)
+	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 2,4 )) # a list of redshifts and annuli
+	bash helpers/model_ell.sh $(ARGS) $(CORES)
 	@echo "========== finished with ell model =========="
 
+model_off:
+	@echo "========== checking for availability of off model =========="
+	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 2,4 )) # a list of redshifts and annuli
+	bash helpers/model_off.sh $(ARGS) $(CORES)
+	@echo "========== finished with off model =========="
+
+model_lss:
+	@echo "========== checking for availability of lss model =========="
+	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 3,4 )) # a list of p(z) and annuli
+	bash helpers/model_lss.sh $(ARGS) $(CORES)
+	@echo "========== finished with lss model =========="
 
 ### model software
 
@@ -197,6 +213,11 @@ src/resample_ell: src/resample_ell.cpp src/enfw/template_ell.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_ell.cpp -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_ell_g: src/resample_ell_g.cpp src/enfw/template_ell.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_ell_g.cpp -o src/resample_ell_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+
+src/resample_off: src/resample_off.cpp src/off/template_off.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_off.cpp -o src/resample_off $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_off_g: src/resample_off_g.cpp src/off/template_off.h src/cosmology.h
+	$(CPP) -fopenmp src/resample_off_g.cpp -o src/resample_off_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
@@ -211,11 +232,11 @@ src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmol
 src/resample_corrh_g: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP) -fopenmp src/resample_corrh_g.cpp -o src/resample_corrh_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
-src/getmodel: src/getmodel.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+src/getmodel: src/getmodel.cpp src/nicaea_pz.h src/model/covariance.h src/cosmology.h src/enfw/enfw.h
 	$(CPP) -fopenmp src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
-src/getmodel_g: src/getmodel_g.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+src/getmodel_g: src/getmodel_g.cpp src/nicaea_pz.h src/model/covariance.h src/cosmology.h src/enfw/enfw.h
 	$(CPP) -fopenmp src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
-src/getmodel_ds: src/getmodel_ds.cpp src/model/covariance.h src/cosmology.h src/enfw/enfw.h
+src/getmodel_ds: src/getmodel_ds.cpp src/nicaea_pz.h src/model/covariance.h src/cosmology.h src/enfw/enfw.h
 	$(CPP) -fopenmp src/getmodel_ds.cpp -o src/getmodel_ds $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 ### filter library

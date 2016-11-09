@@ -1,9 +1,8 @@
-// compress an angular covariance matrix (corrh, lss) to the system of annuli used in the analysis
+// compress an covariance matrix (off) to the system of annuli used
 
 #include <assert.h>
 #include "cosmology.h"
-#include "corrh/template_corrh.h"
-
+#include "off/template_off.h"
 #include <TMV.h>
 #include <iostream>
 
@@ -14,22 +13,26 @@ using namespace tmv;
 
 using namespace CCfits;
 
-#include <fstream>
 
 int main(int argc, char **argv)
 {
 
-  if(argc!=4)
+  if(argc!=5)
   {
-   cout << "syntax: " << argv[0] << " [annulus definition file] [source] [destination]" << endl;
-   return 0;
+   cout << "syntax: " << argv[0] << " [zlens] [annulus definition file] [logM*100] [destination]" << endl;
+   return 1;
   }
 
+  double zlens=atof(argv[1]);
+  assert (zlens>0.);
+  double DLen = angularDiameterDistance(0,zlens,10000)*h; // hinv Mpc per rad
+
+
   // (1) generate annulus structure
-
-  ifstream ann(argv[1]);
+   
+  ifstream ann(argv[2]);
   int Nb; ann >> Nb;
-
+  
   double rmin[Nb];
   double rmax[Nb];
 
@@ -51,30 +54,35 @@ int main(int argc, char **argv)
     rmax2[i]=rmax[i]*rmax[i];
   }
 
-  // (2) create conversion matrix from one set of annuli to the other
+  // (3) create conversion matrix from one set of annuli to the other
   
-  // Nb is set to the final number of bins now, rmin and rmax contain their minimum and maximum radii
-
-  double rhatmin[rsteps];
-  double rhatmax[rsteps];
-  rhatmin[0]=thetamin;
-  rhatmax[0]=rhatmin[0]*rfactor;
-  for(int j=1; j<rsteps; j++) 
+  double m200m=pow10(atof(argv[3])/100.); // hinv Msol
+  double c200m=halomodel::cmz_200m_duffy(m200m,zlens); // assume Duffy here, need to scale covariance to angles correctly
+  double rs_mpc=halomodel::r200mRadius(m200m/h, zlens)*h/c200m; // [Mpc]
+  double rs=rs_mpc/DLen*arcminperrad; // arcmin
+  
+  
+  
+  double rhatmin[nv];
+  double rhatmax[nv];
+  rhatmin[0]=pow10(vmin)*rs;
+  rhatmax[0]=rhatmin[0]*vfac;
+  for(int j=1; j<nv; j++)
   {
     rhatmin[j]=rhatmax[j-1];
-    rhatmax[j]=rhatmin[j]*rfactor;
+    rhatmax[j]=rhatmin[j]*vfac;
   }
   
-  Matrix<double> A(Nb,rsteps);
+  Matrix<double> A(Nb,nv);
 
-  cout << "# input covariance matrix: " << rsteps << " bins from " << rhatmin[0] << " to " << rhatmax[rsteps-1] << " arcmin" << endl;
+  cout << "# input covariance matrix: " << nv << " bins from " << rhatmin[0] << " to " << rhatmax[nv-1] << " arcmin" << endl;
   cout << "# output covariance matrix: " << Nb << " bins from " << rmin[0] << " to " << rmax[Nb-1] << " arcmin" << endl;
   
   // kappa = A kappahat
   for(int i=0; i<Nb; i++)
   {
     double areai = (rmax2[i]-rmin2[i]); // factor of PI consistently left out
-    for(int j=0; j<rsteps; j++)
+    for(int j=0; j<nv; j++)
     {
       if(rmax[i]<=rhatmin[j] || rmin[i]>=rhatmax[j]) // no overlap
       {
@@ -83,31 +91,37 @@ int main(int argc, char **argv)
       }
       double roverlapmin=max(rmin[i],rhatmin[j]);
       double roverlapmax=min(rmax[i],rhatmax[j]);
+      //cout << i << " " << j << " overlapping between " << roverlapmin << " " << roverlapmax << endl;
       A(i,j) = (pow(roverlapmax,2)-pow(roverlapmin,2))/areai;  // factor of PI consistently left out
     }
   }
+    
+  // (4) find matching version of sigma_R in units of r_s
+  double sigma_r=sigma_r_of_m200m(m200m); // [Mpc] Rykoff+2016
+  int nc = int(sigma_r/rs_mpc*100.+0.5);
+  cout << "using sigma_r=" << sigma_r << " Mpc ~ " << nc/100. << " r_s" << endl;
+    
+  // (5) read in some covariance matrix
   
-  //cout << A << endl;   
-  
-  
-  // (3) read in some covariance matrix
-  
-  Matrix<double> covhat(rsteps,rsteps);
+  Matrix<double> covhat(nv,nv);
   
   {
-    auto_ptr<FITS> pInfile(new FITS(argv[2],Read,true));
+    std::ostringstream ss;
+    ss << nc;
+    cout << "opening templates/off/cov_"+ss.str()+".fits" << endl;
+    auto_ptr<FITS> pInfile(new FITS("templates/off/cov_"+ss.str()+".fits",Read,true));
     PHDU& image = pInfile->pHDU(); 
     valarray<double>  contents;      
     image.read(contents);
     long ax1(image.axis(0));
     long ax2(image.axis(1));
     
-    assert(ax1==rsteps);
-    assert(ax2==rsteps);
+    assert(ax1==nv);
+    assert(ax2==nv);
     
     int idx=0;
-    for(int i=0; i<rsteps; i++)
-      for(int j=0; j<rsteps; j++)
+    for(int i=0; i<nv; i++)
+      for(int j=0; j<nv; j++)
       {
 	covhat(i,j)=contents[idx];
 	idx++;
@@ -118,9 +132,6 @@ int main(int argc, char **argv)
   Matrix<double> cov(Nb,Nb);
   
   cov = A*covhat*A.transpose();
-  
-  //cout << cov << endl;
-  
 
   {
     FITS *pFits = 0; 
@@ -128,7 +139,7 @@ int main(int argc, char **argv)
     long naxes[2] = { Nb, Nb };
     try
     {
-      const std::string fileName(argv[3]);            
+      const std::string fileName(argv[4]);            
       pFits = new FITS(fileName, DOUBLE_IMG , naxis , naxes );
     }
     catch (FITS::CantCreate)
