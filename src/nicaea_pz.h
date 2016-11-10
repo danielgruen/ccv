@@ -11,6 +11,10 @@ double beta_from_pz(double zlens, string pzfile)
 
    /* Number of lines */
    F = fopen(pzfile.c_str(), "r");
+   if(!F) {
+    cerr << "Could not open redshift info file " << pzfile << endl;
+    return -1;
+   }
    n = 0;
    do {
       c = fgetc(F);

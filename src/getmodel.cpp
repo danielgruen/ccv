@@ -54,6 +54,13 @@ int main(int argc, char **argv)
        
 	SymMatrix<double> cov = model.cov(m200m);
 
+	
+	if(clss>0) {
+	   FITSCovarianceMatrix lss("model/lss_"+string(argv[4])+"_"+string(argv[3])+".fits");
+	   lss.rescaleCovariance(clss);
+ 	   cov += lss.cov();
+	}
+	
         // (3) write to file
 
 	Covariance::writeMatrixToFITS(cov, argv[1]);
