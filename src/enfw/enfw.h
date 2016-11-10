@@ -392,6 +392,29 @@ double nfw_rhop(double v)
  
 }
 
+double nfw_rhop_offcentered(double v, double o, int csteps=100)
+// projected density of spherical NFW at v[R_s] distance from the centre, when halo itself
+// off-centered by o[R_s]
+{
+  assert(v>0);
+  if(o==0) return nfw_rhop(v);
+  assert(o>0);
+  
+  if(fabs(o-v)<0.001) {return nfw_rhop_offcentered(v, o+0.0011);}
+  
+  double v2o2=v*v+o*o;
+  double vo2=2.*v*o;
+  double k=0.;
+  
+  for(int i=0; i<csteps; i++)
+  {
+    double phi=M_PI*(i+0.5)/csteps; // half a turn is enough
+    double vp=sqrt(v2o2-vo2*cos(phi));
+    k += nfw_rhop(vp);
+  }
+  return k/csteps;
+}
+
 double enfw_rho_cylindrical(double w, double v, double phi, double alpha, double e)
 // evaluated in a cylindrical coordinate system 
 // with w axis tilted w.r.t major axis of halo by angle alpha and sitting in z,x plane, 

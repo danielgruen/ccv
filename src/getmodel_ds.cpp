@@ -1,8 +1,7 @@
-// getmodel: write model covariance (in units of kappa) for halo at given mass and redshift to file
+// getmodel_ds: write model covariance (in units of DeltaSigma) for halo at given mass and redshift to file
 
 #include "model/covariance.h"
 #include "nicaea_pz.h"
-
 
 int main(int argc, char **argv)
 {
@@ -20,15 +19,7 @@ int main(int argc, char **argv)
 	int log10mass100 = 100.*log10(m200m);
         string ap(argv[3]);
 	
-	double beta=0.;
-	{
-	  double zsource=atof(argv[4]);
-	  if(zsource>zlens) { // get beta from fixed zsource
-	    beta=angularDiameterDistance(zlens,zsource,1000)/angularDiameterDistance(0,zsource,1000);
-	  } else {
-	    beta=beta_from_pz(zlens, string(argv[4])+".tab"); 
-	  }
-	}
+	double beta=1.; // it does not matter
 	
 	double cconc = 1.;  // setting cconc=0 would be the right choice for fitting both c and M
 	if(argc>6) cconc = atof(argv[6]);
@@ -40,24 +31,28 @@ int main(int argc, char **argv)
 	if(argc>9) coff  = atof(argv[9]);
         double clss  = 0.;
 	if(argc>10) clss = atof(argv[10]);
-	
+
 	cerr << "# calculating intrinsic covariance for M200m=" << m200m << "h^-1 Msol, z=" << zlens << endl;
 
 	// (2) initialize model
 
 	CovarianceModel model(zlens, beta, log10mass100, log10mass100+1, 
-			       ccorr, cconc, cell, coff, 0., 0.,
-				"model/corrh_"+ap+"_", 			    // string prefixes of model covariance
-				"model/conc/conc_"+ap+"_m",	
-				"model/ell/ell_"+ap+"_m",	
-				"model/off/off_"+ap+"_m");
-       
-	SymMatrix<double> cov = model.cov(m200m);
-
+			      ccorr, cconc, cell, coff, 0., 0., 
+			      "model/gamma/corrh_"+ap+"_", // string prefixes of model covariance for gamma
+			      "model/gamma/conc/conc_"+ap+"_m",	
+			      "model/gamma/ell/ell_"+ap+"_m",	
+			      "model/gamma/off/off_"+ap+"_m"); 
 	
+        double DLen      = angularDiameterDistance(0,zlens,10000)*h;
+        double sigmacrit = ckms*ckms/4./M_PI/Gs/beta/DLen; // h Msol / Mpc^2;
+	
+	SymMatrix<double> cov = (sigmacrit*sigmacrit)*model.cov(m200m);
+
 	if(clss>0) {
-	   FITSCovarianceMatrix lss("model/lss_"+string(argv[4])+"_"+string(argv[3])+".fits");
-	   lss.rescaleCovariance(clss);
+	   beta = beta_from_pz(zlens, string(argv[4])+".tab");
+	   sigmacrit=ckms*ckms/4./M_PI/Gs/beta/DLen; // h Msol / Mpc^2;
+	   FITSCovarianceMatrix lss("model/gamma/lss_"+string(argv[4])+"_"+string(argv[3])+".fits");
+	   lss.rescaleCovariance(clss*sigmacrit*sigmacrit);
  	   cov += lss.cov();
 	}
 	

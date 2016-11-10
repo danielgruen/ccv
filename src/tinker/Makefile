@@ -27,4 +27,4 @@ sigma_of_r: $(OBJS01) sigma_of_r.c
 	$(CC) -o sigma_of_r $(OBJ_NR) header.o utility.o sigmac.o transfnc.o transfunc_file.o nonlinear_power_spectrum.o input_params.o tf_eisenstein_hu.o halo_mass_function.o mstar.o growthfactor.o sigma_of_r.c $(LIB)
 
 clean:
-	rm -f *.o
+	rm -f *.o massfunction.x sigma_of_r print_sigmac

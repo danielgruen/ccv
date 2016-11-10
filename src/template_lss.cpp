@@ -44,9 +44,7 @@ const double lmin=1.e-5;          // lower limit for l integration
 const double lmax=1.e7;           // upper limit for l integration
 const double loglmin=log10(lmin);
 const int nsinsteps=360;              // this many integrations steps for one period in kr of the sin(kr)*k^alpha or this many integration steps for a k interval, whichever is smaller
-////// WAS 2000!!!
 const double radmax=2.*M_PI/nsinsteps; // max d(angle [rad]) for integration of trig fn
-//const double lfac=1.01;              // multiplicative factor in l in first integral
 const double lfac=1.02;              // multiplicative factor in l in first integral
 const double lnlfacinv=log(1./lfac);
 
@@ -334,7 +332,7 @@ int main(int argc, char **argv)
       
       sum += (sum_a+sum_b)/(2.*M_PI*M_PI*sqrt(theta1*theta2));
       
-      cout << thetaa << " " << thetab << " " << sum << endl;
+      //cout << thetaa << " " << thetab << " " << sum << endl;
       cov[ilta][iltb] = cov[iltb][ilta] = sum;
     }
     
@@ -365,6 +363,6 @@ int main(int argc, char **argv)
   
   pFits->pHDU().write(1,rsteps*rsteps,image);
     
-    return 0;
+  return 0;
 }
 

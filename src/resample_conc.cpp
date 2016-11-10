@@ -109,7 +109,8 @@ int main(int argc, char **argv)
     image.read(contents);
     long ax1(image.axis(0));
     long ax2(image.axis(1));
-    
+  
+    cout << ax1 << " " << nv << endl;  
     assert(ax1==nv);
     assert(ax2==nv);
     

@@ -67,15 +67,20 @@ int main(int argc, char **argv)
   
   double rhatmin[nv];
   double rhatmax[nv];
-  double rhatmin2[nv];
-  double rhatmax2[nv];
-  double rhatmean[nv];
   rhatmin[0]=pow10(vmin)*r200m;
   rhatmax[0]=rhatmin[0]*vfac;
   for(int j=1; j<nv; j++)
   {
     rhatmin[j]=rhatmax[j-1];
     rhatmax[j]=rhatmin[j]*vfac;
+  }
+  
+  
+  double rhatmin2[nv];
+  double rhatmax2[nv];
+  double rhatmean[nv];
+  for(int j=0; j<nv; j++)
+  {
     rhatmin2[j]=rhatmin[j]*rhatmin[j];
     rhatmax2[j]=rhatmax[j]*rhatmax[j];
     rhatmean[j]=2.*(pow(rhatmax[j],3)-pow(rhatmin[j],3)) / (3.*(pow(rhatmax[j],2)-pow(rhatmin[j],2)));

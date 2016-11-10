@@ -1,0 +1,20 @@
+plotpz
+  data codex.tab
+  lines 2 0
+  read {id 1 zl 2 pzfile 3.s}
+
+  define i 0
+
+  foreach pzf pzfile {
+    data ""$pzf".tab"
+    lines 3 0
+    read {z 1 pz 2}
+    plotc z pz
+    ctype red
+    relocate $(zl[$i]) 0
+    draw $(zl[$i]) 100000
+    ctype black
+    define i $($i+1) 
+    ! read
+
+  } 
