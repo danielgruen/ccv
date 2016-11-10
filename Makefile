@@ -30,7 +30,8 @@ CORES=7
 ###       z_lens its redshift (choose one between 0.15 and 0.71 with two significant digits to use precomputed templates), 
 ###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
-CLUSTERS=clusters.tab
+#CLUSTERS=clusters.tab
+CLUSTERS=codex.tab
 
 ### annuli definition files:
 ### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
