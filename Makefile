@@ -21,17 +21,17 @@ LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs`
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=48
+CORES=47
 
 ### this is the list of redshifts for which the model should be prepared
 # PRE-COMPUTED REDSHIFTS: these are prepared already, templates will be downloaded so you can use them quickly
-REDSHIFTS=0.24533 
+#REDSHIFTS=0.24533 
 # primary snapshots used in the paper
 
 #REDSHIFTS=0.35 0.187 0.206 0.224 0.234 0.288 0.313 0.348 0.352 0.363 0.391 0.399 0.440 0.450 0.451 0.686 
 # CLASH
 
-#REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 
+REDSHIFTS=0.15 0.16 0.17 0.18 0.19 0.2 0.21 0.22 0.23 0.24 0.25 0.26 0.27 0.28 0.29 0.3 0.31 0.32 0.33 0.34 0.35 0.36 0.37 0.38 0.39 0.4 0.41 0.42 0.43 0.44 0.45 0.46 0.47 0.48 0.49 0.5 0.51 0.52 0.53 0.54 0.55 0.56 0.57 0.58 0.59 0.6 0.62 0.67
 # grid from 0.15 to 0.6
 
 # you can always add your own redshifts to the list and the templates will be calculated (but that may take several processor-days)
@@ -158,9 +158,14 @@ src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
 
-src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
+src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h src/template_lss_resample_g src/template_lss_g
 	$(CPP) -fopenmp src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
 
+src/template_lss_g: src/template_lss_g.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -fopenmp src/template_lss_g.cpp -o src/template_lss_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
+
+src/template_lss_resample_g: src/template_lss_resample_g.cpp src/corrh/template_corrh.h 
+	$(CPP) -fopenmp src/template_lss_resample_g.cpp -o src/template_lss_resample_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 
 #### model
