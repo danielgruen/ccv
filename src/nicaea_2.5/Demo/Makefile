@@ -35,8 +35,8 @@ EXT = a
 
 
 
-cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC)
-lflags     = -L$(FFTW)/lib -L$(GSL)/lib -lm -lgsl -lgslcblas -lfftw3
+cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC) `gsl-config --cflags`
+lflags     = -L$(FFTW)/lib -L$(GSL)/lib `gsl-config --libs` -lfftw3
 
 #objs      := $(patsubst %.h,%.o,$(wildcard *.h))
 objs       = cosmo.o lensing.o reduced_fit.o decomp_eb.o sn1a.o nofz.o lensing_3rd.o \

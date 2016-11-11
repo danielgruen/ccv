@@ -16,8 +16,8 @@
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
-INCLUDES=-I ~/include 
-LIBFLAGS=-L ~/lib -lCCfits -lcfitsio
+INCLUDES=-I ~/werc3/include -I ~/include 
+LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs`
 
@@ -172,9 +172,14 @@ src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h s
 src/template_off: src/template_off.cpp src/off/template_off.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP) -fopenmp src/template_off.cpp src/filter/filter.o -o src/template_off $(INCLUDES) $(LIBFLAGS) 
 
-src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
+src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h src/template_lss_resample_g src/template_lss_g
 	$(CPP) -fopenmp src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
 
+src/template_lss_g: src/template_lss_g.cpp src/corrh/template_corrh.h src/cosmology.h
+	$(CPP) -fopenmp src/template_lss_g.cpp -o src/template_lss_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
+
+src/template_lss_resample_g: src/template_lss_resample_g.cpp src/corrh/template_corrh.h 
+	$(CPP) -fopenmp src/template_lss_resample_g.cpp -o src/template_lss_resample_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 
 #### model

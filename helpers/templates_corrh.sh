@@ -10,6 +10,7 @@ n=0
 ncores=${@: -1}
 
 mkdir -p templates/
+mkdir -p templates/corrh
 
 while test ${#} -gt 1
 do
