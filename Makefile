@@ -22,7 +22,7 @@ LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs`
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=7
+CORES=8
 
 ### cluster definition file
 ### simple format with one line with ID z_lens p_z_source annuli_prefix for each cluster
@@ -31,8 +31,8 @@ CORES=7
 ###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
 #CLUSTERS=clusters.tab
-CLUSTERS=codex.tab
-#CLUSTERS=default.tab
+#CLUSTERS=codex.tab
+CLUSTERS=default.tab
 
 ### annuli definition files:
 ### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
