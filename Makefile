@@ -32,6 +32,7 @@ CORES=7
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
 #CLUSTERS=clusters.tab
 CLUSTERS=codex.tab
+#CLUSTERS=default.tab
 
 ### annuli definition files:
 ### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
