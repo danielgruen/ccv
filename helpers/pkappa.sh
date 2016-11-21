@@ -1,9 +1,18 @@
 #!/bin/bash
 
+if [ $# -lt 1 ]
+then
+  echo "syntax: $0 [pz_prefix(es)]"
+  exit 1
+fi
+
+mkdir -p lut
+
 for PZFILE in "$@"
 do
   if [ ! -s lut/Pkappa_$PZFILE.tab ]
   then
+    echo "calculating Pkappa for $PZFILE"
     ./src/mknicaeaconf $PZFILE.tab
     cp src/nicaea_2.5/Demo/cosmo_lens.par .
     ./src/nicaea_2.5/Demo/pkappa

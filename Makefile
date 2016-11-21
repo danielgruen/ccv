@@ -28,7 +28,7 @@ CORES=8
 ### cluster definition file
 ### simple format with one line per cluster with ID z_lens p_z_source annuli_prefix
 ### where ID is some unique string identifier for the cluster, 
-###       z_lens its redshift (choose one between 0.15 and 0.71 with two significant digits to use precomputed templates and save a lot of time), 
+###       z_lens its redshift (choose one between 0.15 and 0.60 with two significant digits to use precomputed templates and save a lot of time), 
 ###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
 ###                  format is as described in http://www2.iap.fr/users/kilbinge/nicaea/readme-nicaea_2.4.txt
 ###                  example for a single fixed source redshift is in pz.tab
