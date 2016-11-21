@@ -18,21 +18,27 @@
 ###########################################
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 
-#CPP=g++ -fopenmp 
+CPP=g++ -fopenmp 
 # this should work on linux / gcc
 
-CPP=c++ -DNO_OMP -DUSE_MULTIMAP
+#CPP=c++ -DNO_OMP -DUSE_MULTIMAP
 # this sould work on MacOS / clang
 
-INCLUDES=-I ~/werc3/include -I ~/include 
-# add wherever else tmv and CCfits may be
 
 FFTW_PREFIX=/sw
+# FFTW library and header should be in ${FFTW_PREFIX}/lib and ${FFTW_PREFIX}/include
 GSL_PREFIX=`gsl-config --prefix`
 
-LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
+LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -L ${FFTW_PREFIX}/lib -L ${GSL_PREFIX}/lib -lCCfits -lcfitsio 
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs --cflags`
+# these are just some directories in which I have these libraries sitting
+# add wherever else tmv and CCfits libfiles may be
+
+INCLUDES=-I ~/werc3/include -I ~/include -I ${FFTW_PREFIX}/include -I ${GSL_PREFIX}/include
+# these are just some directories in which I have these header files sitting
+# add wherever else tmv and CCfits .h-files may be
+
 
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
