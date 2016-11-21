@@ -13,6 +13,7 @@
 ####     of redshift and mass by running ./src/getmodel, which outputs a fits file.
 ####     See ./src/getmodel.cpp for how to handle this in c++ directly.
 ####     The analogous covariance matrix for gamma is output by ./src/getmodel_g
+####     The analogous covariance matrix for DeltaSigma is output by ./src/getmodel_ds
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
