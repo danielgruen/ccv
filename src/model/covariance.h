@@ -13,8 +13,10 @@ using namespace CCfits;
 #include <TMV.h>
 #include <TMV_Sym.h>
 
+#ifndef _COVARIANCE_HELPERS_H_
 #include "../cosmology.h"
 #include "../enfw/enfw.h"
+#endif
 
 using namespace tmv;
 using namespace std;
@@ -145,6 +147,20 @@ class CovarianceMatrix : public Covariance {
      (*vd) *= scale;
     }
     
+    void rescaleCovariance(vector<double> scale) {
+     assert(scale.size()==c->colsize());
+     
+     for(int i=0; i<c->colsize(); i++)
+     {
+       (*d)(i)    = (*d)(i)*scale[i]*scale[i];
+       (*vd)(i)   = (*vd)(i)*scale[i]*scale[i];
+       for(int j=i; j<c->colsize(); j++)
+       {
+         (*c)(i,j) = (*c)(i,j)*scale[i]*scale[j];
+       }
+     }
+    }
+    
     void setMatrix(SymMatrix<double> &dc) {
      delete c;
      delete d;
@@ -176,11 +192,48 @@ class CovarianceMatrix : public Covariance {
      
      setMatrix(bufs);
     }
+    
+    void addFromWeight(vector<double> weight) {
+    // add variance according to a 1/var weight vector to diagonal
+     assert(weight.size()==c->colsize());
+     for(int i=0; i<weight.size(); i++) {
+       (*c)(i,i) = (*c)(i,i)+1./weight[i];
+       (*d)(i)   = (*d)(i)+1./weight[i];
+       (*vd)(i)  = (*vd)(i)+1./weight[i];
+     }
+    }
 
   protected:
     SymMatrix<double>  *c;
     DiagMatrix<double> *d;
     Vector<double>    *vd;
+};
+
+
+class CovarianceSum : public Covariance {
+
+  public:
+    CovarianceSum(Covariance *dc1, Covariance *dc2) : Covariance(), c1(dc1), c2(dc2) {
+    
+    }
+    
+    SymMatrix<double> cov(CovarianceParameters &p) {
+      SymMatrix<double> c(c1->cov(p)+c2->cov(p));
+      return c;
+    }
+    
+    DiagMatrix<double> covDiag(CovarianceParameters &p){  
+      DiagMatrix<double> c(c1->covDiag(p)+c2->covDiag(p));
+      return c;
+    }
+    
+    Vector<double> var(CovarianceParameters &p){
+      Vector<double> c(c1->var(p)+c2->var(p));
+      return c;
+    }
+
+  private:
+    Covariance *c1,*c2;
 };
 
 
@@ -330,6 +383,14 @@ class CovarianceMassArray : public Covariance {
 	}
     }
     
+    void rescaleCovariance(vector<double> f)
+    {
+	for(int i=0; i<matrices.size(); i++)
+	{
+	   matrices[i]->rescaleCovariance(f); 
+	}    
+    }
+    
     void project(const MatrixView<double> P)
     // project to a new basis described by rows of P
     // C --> P C P^T in that basis
@@ -462,6 +523,20 @@ class CovarianceModel : public Covariance {
       CovarianceParameters p = covarianceParameters(m200m, zlens);
       return var(p);
     }
+    
+    void rescaleCovariance(double scale) {
+      Ccorr->rescaleCovariance(scale);
+      Cconc->rescaleCovariance(scale);
+      Cell->rescaleCovariance(scale);
+      Coff->rescaleCovariance(scale);
+    }
+    
+    void rescaleCovariance(vector<double> &scale) {
+      Ccorr->rescaleCovariance(scale);
+      Cconc->rescaleCovariance(scale);
+      Cell->rescaleCovariance(scale);
+      Coff->rescaleCovariance(scale);
+    }
 
     double zlens, sigmacrit;
     double ccorr, cconc, cell, coff;
@@ -471,6 +546,26 @@ class CovarianceModel : public Covariance {
     CovarianceMassArray  *Cconc, *Cell, *Coff;
  
 };
+
+
+vector<double> add_noise(vector<double> &data, Covariance &cov)
+// returns the sum of data and a Gaussian noise realization according to cov
+{
+    Matrix<double> U = cov.cov().chd().getL();
+
+    Vector<double> r(data.size());
+    for(int j=0; j<data.size(); j++)
+       r(j) = gaussian_random(0,1);
+      
+    Vector<double> noise = r*U.transpose();
+    
+    vector<double> out(data);
+    for(int i=0; i<data.size(); i++)
+       out[i] += noise(i);
+       
+    return out;
+}
+
 
 #endif
 
