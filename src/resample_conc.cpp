@@ -34,24 +34,19 @@ int main(int argc, char **argv)
 
   double rmin[Nb];
   double rmax[Nb];
-
-  for(int i=0; i<Nb; i++)
-  {
-    ann >> rmin[i] >> rmax[i];
-    assert(ann.eof()==0);
-  }
-  string buf;
-  ann >> buf;
-  assert(ann.eof());
-
   double rmin2[Nb];
   double rmax2[Nb];
 
   for(int i=0; i<Nb; i++)
   {
+    ann >> rmin[i] >> rmax[i];
     rmin2[i]=rmin[i]*rmin[i];
     rmax2[i]=rmax[i]*rmax[i];
+    assert(ann.eof()==0);
   }
+  string buf;
+  ann >> buf;
+  assert(ann.eof());
 
   // (3) create conversion matrix from one set of annuli to the other
   

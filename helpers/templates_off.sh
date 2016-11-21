@@ -9,20 +9,20 @@ fi
 mkdir -p pub
 mkdir -p templates/off
 
-#if [ ! -s templates/off/cov_100.fits ]
-#then
+if [ ! -s templates/off/cov_100.fits ]
+then
 
-#  URL=http://www.usm.uni-muenchen.de/~dgruen/code/templates/templates_ell.tar.gz
+  URL=http://www.usm.uni-muenchen.de/~dgruen/code/templates/templates_off.tar.gz
 
-#  curl -s --head $URL | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
-#  if [ $? -eq 0 ]
-#  then    
-#    echo "I am a lazy script and will download ell templates rather than calculating them"
-#    curl $URL > pub/templates_ell.tar.gz
-#    tar xzf pub/templates_ell.tar.gz
-#    exit 0
-#  fi
-#fi
+  curl -s --head $URL | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
+  if [ $? -eq 0 ]
+  then    
+    echo "I am a lazy script and will download off templates rather than calculating them"
+    curl $URL > pub/templates_off.tar.gz
+    tar xzf pub/templates_off.tar.gz
+    exit 0
+  fi
+fi
 
 
 

@@ -1,4 +1,4 @@
-default 0.24533 default_pz annulidefault
+13271 0.07 CODEX13271_pz annuli13271
 210288 0.11 CODEX210288_pz annuli210288
 210306 0.13 CODEX210306_pz annuli210306
 13380 0.14 CODEX13380_pz annuli13380
@@ -6,6 +6,7 @@ default 0.24533 default_pz annulidefault
 60076 0.14 CODEX60076_pz annuli60076
 54796 0.17 CODEX54796_pz annuli54796
 60155 0.18 CODEX60155_pz annuli60155
+default 0.24533 default_pz annulidefault
 46647 0.26 CODEX46647_pz annuli46647
 60131 0.27 CODEX60131_pz annuli60131
 17453 0.29 CODEX17453_pz annuli17453

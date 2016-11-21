@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ $# -lt 1 ]
+then
+  echo "syntax: $0 [pz_prefix(es)]"
+  exit 1
+fi
+
 for PZFILE in "$@"
 do
   if [ ! -f ./templates/lss_$PZFILE.fits ]
