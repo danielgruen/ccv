@@ -14,6 +14,7 @@
 ####     See ./src/getmodel.cpp for how to handle this in c++ directly.
 ####     The analogous covariance matrix for gamma is output by ./src/getmodel_g
 
+###########################################
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
 INCLUDES=-I ~/werc3/include -I ~/include 
@@ -25,21 +26,17 @@ LIBFLAGS_GSL=`gsl-config --libs`
 CORES=8
 
 ### cluster definition file
-### simple format with one line with ID z_lens p_z_source annuli_prefix for each cluster
+### simple format with one line per cluster with ID z_lens p_z_source annuli_prefix
 ### where ID is some unique string identifier for the cluster, 
-###       z_lens its redshift (choose one between 0.15 and 0.71 with two significant digits to use precomputed templates), 
+###       z_lens its redshift (choose one between 0.15 and 0.71 with two significant digits to use precomputed templates and save a lot of time), 
 ###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
+###                  format is as described in http://www2.iap.fr/users/kilbinge/nicaea/readme-nicaea_2.4.txt
+###                  example for a single fixed source redshift is in pz.tab
+###                  example for a realistic distribution estimated from data is in stack_pz.tab
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
-#CLUSTERS=clusters.tab
+###                  simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
 #CLUSTERS=codex.tab
 CLUSTERS=default.tab
-
-### annuli definition files:
-### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
-### after you have run make, if you want to change your annuli definition, run 'make clean_model' and 'make' again
-
-### redshift distribution files:
-### in nicaea format
 
 ######## END INSTALLATION INSTRUCTIONS ########
 
