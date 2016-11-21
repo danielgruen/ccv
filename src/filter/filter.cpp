@@ -262,9 +262,12 @@ double pow2_filter(double x)
    ExtHDU& table = pInfile->extension(extension);
    
    
-   
+#ifdef USE_MULTIMAP   
+   multimap<string, Column *> colmap = table.column();
+#else
    map<string, Column *> colmap = table.column();
-   
+#endif
+
    prototype=new ObjectPrototype();
    
    vector<vector<int> > intcolumns;
@@ -303,30 +306,8 @@ double pow2_filter(double x)
 	try {
 	(*iter).second->read(intcolumns.back(),1,table.rows());
 	} catch (...) {
-	  cout << "# caught an error reading int column, maybe it's an array column" << endl; 
-	  vector<valarray<int> > vals; // vector of array cells
-	  (*iter).second->readArrays(vals,1,table.rows());
-	  vector<int> v1[vals[0].size()-1];
-	  for (int i=0; i<vals.size(); i++)
-	  {
-	    (intcolumns.back()).push_back(vals[i][0]);
-	    for(int j=0; j<vals[0].size()-1; j++)
-	    {
-	    v1[j].push_back(vals[i][j+1]); 
-	    }
-	  }
-	  string number[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
-	  if(vals[0].size()>15) {
-	   cout << "too many columns" << endl; exit(1); 
-	  }
-	  for(int j=0; j<vals[0].size()-1; j++)
-	  {
-		prototype->intVkey(prefix+(*iter).first+number[j],true);
-		intcolumns.push_back(v1[j]);
-		cerr << "# reading column " << (*iter).first+number[j] << endl;
-		cerr << "# size: " << v1[j].size() << endl;
-		extracolumns++;
-	  }
+	  cerr << "# caught an error reading int column, maybe it's an array column" << endl; 
+          exit(1);
 	}
       }
 	break;	
@@ -339,29 +320,8 @@ double pow2_filter(double x)
 	try {
 	(*iter).second->read(doublecolumns.back(),1,table.rows());
 	} catch (...) {
-	  cout << "# caught an error reading double column, maybe it's an array column" << endl; 
-	  vector<valarray<double> > vals; // vector of array cells
-	  (*iter).second->readArrays(vals,1,table.rows());
-	  vector<double> v1[vals[0].size()-1];
-	  for (int i=0; i<vals.size(); i++)
-	  {
-	    (doublecolumns.back()).push_back(vals[i][0]);
-	    for(int j=0; j<vals[0].size()-1; j++)
-	    {
-	    v1[j].push_back(vals[i][j+1]); 
-	    }
-	  }
-	  string number[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
-	  if(vals[0].size()>15) {
-	   cout << "too many columns" << endl; exit(1); 
-	  }
-	  for(int j=0; j<vals[0].size()-1; j++)
-	  {
-		prototype->doubleVkey(prefix+(*iter).first+number[j],true);
-		doublecolumns.push_back(v1[j]);
-		cerr << "# reading column " << (*iter).first+number[j] << endl;
-		extracolumns++;
-	  }
+	  cerr << "# caught an error reading double column, maybe it's an array column" << endl; 
+          exit(1);
 	}
       }
 	break;	
@@ -388,9 +348,13 @@ double pow2_filter(double x)
   {
    auto_ptr<FITS> pInfile(new FITS(file, Read, extension, false));
    ExtHDU& table = pInfile->extension(extension);
-   
+  
+#ifdef USE_MULTIMAP
+   multimap<string, Column *> colmap = table.column();
+#else 
    map<string, Column *> colmap = table.column();
-   
+#endif
+
    prototype=new ObjectPrototype();
    
    vector<vector<int> > intcolumns;
@@ -399,7 +363,11 @@ double pow2_filter(double x)
    
    // build prototype
    int extracolumns=0;
+#ifdef USE_MULTIMAP
+   for (multimap<string, Column *>::iterator iter = colmap.begin(); 
+#else
    for (map<string, Column *>::iterator iter = colmap.begin(); 
+#endif
 	(iter != colmap.end() && (columns.size()==0 || intcolumns.size()+doublecolumns.size()+stringcolumns.size()-extracolumns<columns.size()));
         iter++) {
 
@@ -429,30 +397,8 @@ double pow2_filter(double x)
 	try {
 	(*iter).second->read(intcolumns.back(),1,table.rows());
 	} catch (...) {
-	  cout << "# caught an error reading int column, maybe it's an array column" << endl; 
-	  vector<valarray<int> > vals; // vector of array cells
-	  (*iter).second->readArrays(vals,1,table.rows());
-	  vector<int> v1[vals[0].size()-1];
-	  for (int i=0; i<vals.size(); i++)
-	  {
-	    (intcolumns.back()).push_back(vals[i][0]);
-	    for(int j=0; j<vals[0].size()-1; j++)
-	    {
-	    v1[j].push_back(vals[i][j+1]); 
-	    }
-	  }
-	  string number[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
-	  if(vals[0].size()>15) {
-	   cout << "too many columns" << endl; exit(1); 
-	  }
-	  for(int j=0; j<vals[0].size()-1; j++)
-	  {
-		prototype->intVkey(prefix+(*iter).first+number[j],true);
-		intcolumns.push_back(v1[j]);
-		cerr << "# reading column " << (*iter).first+number[j] << endl;
-		cerr << "# size: " << v1[j].size() << endl;
-		extracolumns++;
-	  }
+	  cerr << "# caught an error reading int column, maybe it's an array column" << endl; 
+          exit(1);
 	}
       }
 	break;	
@@ -465,30 +411,9 @@ double pow2_filter(double x)
 	try {
 	(*iter).second->read(doublecolumns.back(),1,table.rows());
 	} catch (...) {
-	  cout << "# caught an error reading double column, maybe it's an array column" << endl; 
-	  vector<valarray<double> > vals; // vector of array cells
-	  (*iter).second->readArrays(vals,1,table.rows());
-	  vector<double> v1[vals[0].size()-1];
-	  for (int i=0; i<vals.size(); i++)
-	  {
-	    (doublecolumns.back()).push_back(vals[i][0]);
-	    for(int j=0; j<vals[0].size()-1; j++)
-	    {
-	    v1[j].push_back(vals[i][j+1]); 
-	    }
-	  }
-	  string number[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15" };
-	  if(vals[0].size()>15) {
-	   cout << "too many columns" << endl; exit(1); 
-	  }
-	  for(int j=0; j<vals[0].size()-1; j++)
-	  {
-		prototype->doubleVkey(prefix+(*iter).first+number[j],true);
-		doublecolumns.push_back(v1[j]);
-		cerr << "# reading column " << (*iter).first+number[j] << endl;
-		extracolumns++;
-	  }
-	}
+	  cerr << "# caught an error reading double column, maybe it's an array column" << endl; 
+          exit(1);
+ 	}
       }
 	break;	
       case Tstring:
@@ -542,13 +467,22 @@ double pow2_filter(double x)
    hdus[0]=extension;
    auto_ptr<FITS> pInfile(new FITS(file, Read, hdus, false));
    ExtHDU& table = pInfile->extension(extension);
+#ifdef USE_MULTIMAP
+   multimap<string, Column *> colmap = table.column();
+#else
    map<string, Column *> colmap = table.column();
+#endif
    
    vector<vector<int> > intcolumns;
    vector<vector<double> > doublecolumns;
    vector<vector<string> > stringcolumns;
-   
-   for (map<string, Column *>::iterator iter = colmap.begin(); (iter != colmap.end() && (columns.size()==0 || intcolumns.size()+doublecolumns.size()+stringcolumns.size()<columns.size())); iter++) {
+  
+#ifdef USE_MULTIMAP 
+   for (multimap<string, Column *>::iterator iter = colmap.begin(); 
+#else
+   for (map<string, Column *>::iterator iter = colmap.begin(); 
+#endif
+       (iter != colmap.end() && (columns.size()==0 || intcolumns.size()+doublecolumns.size()+stringcolumns.size()<columns.size())); iter++) {
 
     if (columns.size()>0 && std::find(columns.begin(), columns.end(), (*iter).first) == columns.end()) // do not care about this column
       continue;
@@ -2688,7 +2622,8 @@ ostream& operator<<(ostream &os, ObjectPrototype& prototype)
     }
     
     os << '\n';
-  
+ 
+    return os; 
 }
 
 ostream& operator<<(ostream& os, ObjectCollection& dt)

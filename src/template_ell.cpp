@@ -30,8 +30,10 @@ int main(int argc, char **argv)
    return 1;
   }
 
+#ifndef NO_OMP
   omp_set_num_threads(1);
-    
+#endif 
+
   FITS *pFits = 0; 
   long naxis    =   2;      
   long naxes[2] = { nv, nv };

@@ -17,11 +17,23 @@
 
 ###########################################
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
-CPP=g++
+
+#CPP=g++ -fopenmp 
+# this should work on linux / gcc
+
+CPP=c++ -DNO_OMP -DUSE_MULTIMAP
+# this sould work on MacOS / clang
+
 INCLUDES=-I ~/werc3/include -I ~/include 
+# add wherever else tmv and CCfits may be
+
+FFTW_PREFIX=/sw
+GSL_PREFIX=`gsl-config --prefix`
+
 LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
-LIBFLAGS_GSL=`gsl-config --libs`
+LIBFLAGS_GSL=`gsl-config --libs --cflags`
+
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
 CORES=8
@@ -83,7 +95,7 @@ src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 	$(CPP) -o src/mktinkerconf src/mktinkerconf.cpp	
 
 nicaea: src/mknicaeaconf
-	$(MAKE) -C src/nicaea_2.5/Demo
+	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=/sw GSL_PREFIX=/sw
 
 src/mknicaeaconf: src/mknicaeaconf.cpp src/cosmology.h
 	$(CPP) -o src/mknicaeaconf src/mknicaeaconf.cpp	

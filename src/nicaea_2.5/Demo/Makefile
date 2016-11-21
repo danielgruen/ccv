@@ -7,8 +7,8 @@
 
 CC         = gcc
 
-FFTW       = /usr/local
-GSL        = $(HOME)
+FFTW       = $(FFTW_PREFIX)
+GSL        = $(GSL_PREFIX)
 
 WARNINGS   = -Wall -Wuninitialized -pedantic
 OPTIM      = -O3

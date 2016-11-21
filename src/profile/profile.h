@@ -2,8 +2,9 @@
 #define _PROFILE_H_
 
 #include "../cosmology.h"
-#include <complex.h>
-#undef complex
+//#include <complex.h>
+//#undef complex
+#include <complex>
 
 double b_nfw(double c200m)
 {
@@ -60,10 +61,10 @@ double ample_kappa_NFW_trunc2 ( double x, double tau )
   double u2 = u * u;
   //double u3 = u2 * u;
 
-  complex<double> arccosu = cacos ( 1.0 / rootu );
+  complex<double> arccosu = std::acos ( 1.0 / rootu );
   complex<double> sqrtum1, arccossqrt;
   
-  sqrtum1 = csqrt ( um1 );
+  sqrtum1 = std::sqrt ( um1 );
   if ( u < 1.0 ) sqrtum1 = -1.*sqrtum1;
   arccossqrt = arccosu / sqrtum1;
   

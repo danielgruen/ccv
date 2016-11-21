@@ -23,7 +23,10 @@
 #include <fstream>
 #include <cstdlib>
 #include <cmath>
+
+#ifndef NO_OMP
 #include <omp.h>
+#endif
 
 using namespace std;
 

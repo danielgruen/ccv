@@ -483,9 +483,10 @@ namespace xilinear {
    
    else if(n<=0)
      return pow10(logxi[0]+alphasmall*n)*pow(pklinear::dz(z),2);
-   else if(n>=nsteps-1)
+   //else if(n>=nsteps-1)
      return pow10(logxi[nsteps-1]+alphalarge*(n-nsteps+1))*pow(pklinear::dz(z),2);
- }
+     
+}
   
 }
 
@@ -562,7 +563,7 @@ namespace Wlinear {
    
    else if(n<=0)
      return pow10(logW[0]); // constant at small theta
-   else if(n>=nsteps-1) 
+   //else if(n>=nsteps-1) 
      return pow10(logW[nsteps-1]+alphalarge*(n-nsteps+1.)); // power law at large theta
  }
   
@@ -916,7 +917,7 @@ namespace Pkappa {
    // power-law extrapolate to really large and really small l
    else if(n<=0)
      return logPkappa[0]+alphasmall*n;
-   else if(n>=nsteps-1) 
+   //else if(n>=nsteps-1) 
      return logPkappa[nsteps-1]+alphalarge*(n-nsteps+1.);
  }
   
