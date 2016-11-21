@@ -2,7 +2,7 @@
 
 for PZFILE in "$@"
 do
-  if [ ! -f lut/Pkappa_$PZFILE.tab ]
+  if [ ! -s lut/Pkappa_$PZFILE.tab ]
   then
     ./src/mknicaeaconf $PZFILE.tab
     cp src/nicaea_2.5/Demo/cosmo_lens.par .

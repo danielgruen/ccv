@@ -16,13 +16,13 @@
 
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
-INCLUDES=-I ~/include 
-LIBFLAGS=-L ~/lib -L /sw/lib -lCCfits -lcfitsio
+INCLUDES=-I ~/werc3/include -I ~/include 
+LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs`
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=7
+CORES=8
 
 ### cluster definition file
 ### simple format with one line with ID z_lens p_z_source annuli_prefix for each cluster
@@ -31,7 +31,8 @@ CORES=7
 ###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
 #CLUSTERS=clusters.tab
-CLUSTERS=codex.tab
+#CLUSTERS=codex.tab
+CLUSTERS=default.tab
 
 ### annuli definition files:
 ### simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
@@ -173,8 +174,6 @@ src/template_off: src/template_off.cpp src/off/template_off.h src/enfw/enfw.h sr
 
 src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP)  src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
-
-
 
 #### model
 

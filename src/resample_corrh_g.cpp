@@ -63,9 +63,6 @@ int main(int argc, char **argv)
   {
     rhatmin[j]=rhatmax[j-1];
     rhatmax[j]=rhatmin[j]*rfactor;
-    rhatmin2[j]=rhatmin[j]*rhatmin[j];
-    rhatmax2[j]=rhatmax[j]*rhatmax[j];
-    rhatmean[j]=2.*(pow(rhatmax[j],3)-pow(rhatmin[j],3)) / (3.*(pow(rhatmax[j],2)-pow(rhatmin[j],2)));
   }
   
   double rhatmin2[rsteps];
