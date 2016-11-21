@@ -31,7 +31,7 @@ CORES=47
 ###       p_z_source the lensing-weighted source redshift distribution prefix in the cluster field (expected in this directory with suffix .tab)
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
 #CLUSTERS=clusters.tab
-CLUSTERS=codex.tab
+CLUSTERS=codex_all.tab
 #CLUSTERS=default.tab
 
 ### annuli definition files:
