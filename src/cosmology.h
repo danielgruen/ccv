@@ -32,6 +32,8 @@ double rho0crit = 3.*H0*H0/(8.*M_PI*Gs); // [ Msol / Mpc^3 ]
 const double arcminperrad=180.*60./M_PI;
 const double radperarcmin=1./arcminperrad;
 
+double pow10(double a) { return pow(10,a); }
+
 double angularDiameterDistance(double z1, double z2, int num=1000)
 {
    double sum = 0;

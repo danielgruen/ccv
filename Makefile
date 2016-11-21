@@ -17,7 +17,7 @@
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 CPP=g++
 INCLUDES=-I ~/werc3/include -I ~/include 
-LIBFLAGS=-L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
+LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
 LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
 LIBFLAGS_GSL=`gsl-config --libs`
 
@@ -125,7 +125,7 @@ lut/Pkappa.tab:
 ### lut_software
 
 src/calc_W: src/calc_W.cpp src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp -o src/calc_W $(INCLUDES) $(LIBFLAGS) src/calc_W.cpp
+	$(CPP)  -o src/calc_W $(INCLUDES) $(LIBFLAGS) src/calc_W.cpp
 
 #### templates
 
@@ -158,22 +158,22 @@ template_lss:
 ### template_software
 
 src/template_corrh: src/template_corrh.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp src/template_corrh.cpp -o src/template_corrh $(INCLUDES) $(LIBFLAGS) 
+	$(CPP)  src/template_corrh.cpp -o src/template_corrh $(INCLUDES) $(LIBFLAGS) 
 
 src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_corrh.h src/corrh/corrh.h src/enfw/enfw.h src/profile/profile.h src/cosmology.h
-	$(CPP) -fopenmp src/template_corrh_combine.cpp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS)
+	$(CPP)  src/template_corrh_combine.cpp -o src/template_corrh_combine $(INCLUDES) $(LIBFLAGS)
 
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
-	$(CPP) -fopenmp src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
+	$(CPP)  src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
  
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
-	$(CPP) -fopenmp src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
+	$(CPP)  src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
  
 src/template_off: src/template_off.cpp src/off/template_off.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
-	$(CPP) -fopenmp src/template_off.cpp src/filter/filter.o -o src/template_off $(INCLUDES) $(LIBFLAGS) 
+	$(CPP)  src/template_off.cpp src/filter/filter.o -o src/template_off $(INCLUDES) $(LIBFLAGS) 
 
 src/template_lss: src/template_lss.cpp src/corrh/template_corrh.h src/cosmology.h
-	$(CPP) -fopenmp src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
+	$(CPP)  src/template_lss.cpp -o src/template_lss $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_GSL) 
 
 #### model
 
@@ -210,39 +210,39 @@ model_lss:
 ### model software
 
 src/resample_ell: src/resample_ell.cpp src/enfw/template_ell.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_ell.cpp -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_ell.cpp -o src/resample_ell $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_ell_g: src/resample_ell_g.cpp src/enfw/template_ell.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_ell_g.cpp -o src/resample_ell_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_ell_g.cpp -o src/resample_ell_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_off: src/resample_off.cpp src/off/template_off.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_off.cpp -o src/resample_off $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_off.cpp -o src/resample_off $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_off_g: src/resample_off_g.cpp src/off/template_off.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_off_g.cpp -o src/resample_off_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_off_g.cpp -o src/resample_off_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_conc.cpp -o src/resample_conc $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_conc_g: src/resample_conc_g.cpp src/conc/template_conc.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_conc_gamma: src/resample_conc_gamma.cpp src/conc/template_conc.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_conc_gamma.cpp -o src/resample_conc_gamma $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_conc_gamma.cpp -o src/resample_conc_gamma $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/resample_corrh_g: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
-	$(CPP) -fopenmp src/resample_corrh_g.cpp -o src/resample_corrh_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/resample_corrh_g.cpp -o src/resample_corrh_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/getmodel: src/getmodel.cpp src/nicaea_pz.h src/model/covariance.h src/cosmology.h src/enfw/enfw.h
-	$(CPP) -fopenmp src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP) src/getmodel.cpp -o src/getmodel $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/getmodel_g: src/getmodel_g.cpp src/nicaea_pz.h src/model/covariance.h src/cosmology.h src/enfw/enfw.h
-	$(CPP) -fopenmp src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/getmodel_g.cpp -o src/getmodel_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 src/getmodel_ds: src/getmodel_ds.cpp src/nicaea_pz.h src/model/covariance.h src/cosmology.h src/enfw/enfw.h
-	$(CPP) -fopenmp src/getmodel_ds.cpp -o src/getmodel_ds $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+	$(CPP)  src/getmodel_ds.cpp -o src/getmodel_ds $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 ### filter library
 
 src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
-	$(CPP) -fopenmp -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
+	$(CPP)  -o src/filter/filter.o $(INCLUDES) $(LIBFLAGS) -c src/filter/filter.cpp
 
 #### clean: re-compile software afterwards
 
