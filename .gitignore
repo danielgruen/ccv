@@ -1,0 +1,10 @@
+# emacs backup files
+*~
+
+# compiled files
+*.o
+*.so
+
+# directories
+model
+templates
