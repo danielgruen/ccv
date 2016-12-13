@@ -71,7 +71,7 @@ info:
 
 ##### all
 
-software: lut_software template_software model_software tinker nicaea			# programs to calculate covariances
+software: lut_software template_software model_software tinker nicaea lambda_at_m_z	# programs to calculate covariances
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
@@ -81,6 +81,9 @@ model: model_corrh model_conc model_ell model_off model_lss				# co-added and re
 
 
 #### software
+
+lambda_at_m_z: src/lambda_at_m_z.cpp src/cosmology.h lut_dndM
+	$(CPP) -o src/lambda_at_m_z src/lambda_at_m_z.cpp
 
 template_software: src/template_corrh src/template_corrh_combine src/template_conc src/template_ell src/template_off src/template_lss
 
