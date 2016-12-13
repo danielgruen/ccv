@@ -19,20 +19,39 @@
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 
 #CPP=g++ -fopenmp 
+#Below is the CPP for Tom's laptop
+CPP=g++ -fopenmp -DUSE_MULTIMAP
 # this should work on linux / gcc
 
-CPP=c++ -DNO_OMP -DUSE_MULTIMAP
+#CPP=c++ -DNO_OMP -DUSE_MULTIMAP
 # this sould work on MacOS / clang
 
-INCLUDES=-I ~/werc3/include -I ~/include 
-# add wherever else tmv and CCfits may be
 
-FFTW_PREFIX=/sw
-GSL_PREFIX=`gsl-config --prefix`
+# FFTW library and header should be in ${FFTW_PREFIX}/lib and ${FFTW_PREFIX}/include
+# FFTW_PREFIX=/sw
+#GSL_PREFIX=`gsl-config --prefix`
+# Below is the modification for Tom's laptop
+FFTW_PREFIX=/home/tom/code/fftw
+GSL_PREFIX=`/home/tom/code/gsl/gsl-2.1/gsl-config --prefix`
+CCFITS_PREFIX=/home/tom/code/CCfits
+CFITSIO_PREFIX=/home/tom/code/cfitsio
+TMV_PREFIX=/home/tom/code/tmv
 
-LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
-LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
-LIBFLAGS_GSL=`gsl-config --libs --cflags`
+# LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -L ${FFTW_PREFIX}/lib -L ${GSL_PREFIX}/lib -lCCfits -lcfitsio 
+LIBFLAGS=-L ${TMV_PREFIX}/lib -L ${CFITSIO_PREFIX}/lib -L ${CCFITS_PREFIX}/lib -L /sw/lib -L ~/werc3/lib -L ~/lib -L ${FFTW_PREFIX}/lib -L ${GSL_PREFIX}/lib -lCCfits -lcfitsio 
+# LIBFLAGS_TMV=-ltmv -ltmv_symband -lblas -lpthread
+LIBFLAGS_TMV=-ltmv -ltmv_symband -lpthread
+#LIBFLAGS_GSL=`gsl-config --libs --cflags`
+# Below is the modification for Tom's laptop
+LIBFLAGS_GSL=`/home/tom/code/gsl/gsl-2.1/gsl-config --libs --cflags`
+# these are just some directories in which I have these libraries sitting
+# add wherever else tmv and CCfits libfiles may be
+
+# INCLUDES=-I ~/werc3/include -I ~/include -I ${FFTW_PREFIX}/include -I ${GSL_PREFIX}/include
+INCLUDES=-I ${TMV_PREFIX}/include -I ${CFITSIO_PREFIX}/include -I ${CCFITS_PREFIX}/include -I ~/werc3/include -I ~/include -I ${FFTW_PREFIX}/include -I ${GSL_PREFIX}/include
+# these are just some directories in which I have these header files sitting
+# add wherever else tmv and CCfits .h-files may be
+
 
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
@@ -98,7 +117,7 @@ src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 	$(CPP) -o src/mktinkerconf src/mktinkerconf.cpp	
 
 nicaea: src/mknicaeaconf
-	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=/sw GSL_PREFIX=/sw
+	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=${FFTW_PREFIX} GSL_PREFIX=${GSL_PREFIX}
 
 src/mknicaeaconf: src/mknicaeaconf.cpp src/cosmology.h
 	$(CPP) -o src/mknicaeaconf src/mknicaeaconf.cpp	
@@ -283,4 +302,3 @@ pub/templates_ell.tar.gz: templates/ell/cov_100.fits
 pub/ccv.tar.gz:
 	-git commit -a
 	bash helpers/pack_software.sh $(VERSION)
-	
