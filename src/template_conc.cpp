@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 {
   
   if(argc!=3) {
-   cout << "syntax: " << argv[0] << " [c200m] [output filename]" << endl;
+   std::cout << "syntax: " << argv[0] << " [c200m] [output filename]" << std::endl;
    return 1;
   }
       
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   }
   catch (FITS::CantCreate)
   {
-    cerr << "error, can't create fits file" << endl;
+    std::cerr << "error, can't create fits file" << std::endl;
     return 1;
   } 
   
@@ -69,7 +69,7 @@ int main(int argc, char **argv)
        Tprod[i][j] += Tbuf[i]*Tbuf[j]/w;
       }
     }
-    cout << 100.*((dlog10c+log10cdcmax)/(2.*log10cdcmax)) << "%                       \r" << flush; 
+    std::cout << 100.*((dlog10c+log10cdcmax)/(2.*log10cdcmax)) << "%                       \r" << std::flush; 
     dn += w;
   }
   

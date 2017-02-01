@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include "cosmology.h"
 
 using namespace std;

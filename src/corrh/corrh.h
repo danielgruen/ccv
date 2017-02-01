@@ -42,7 +42,7 @@ void halosigma(
   // (0) clear density
   memcpy(dens, zeros, rsteps*sizeof(double));
   
-  const double tmax=min(rmax[rsteps-1]+r,hardtruncation*rs);
+  const double tmax=std::min(rmax[rsteps-1]+r,hardtruncation*rs);
   
   nonzero_minannulus=rsteps-1;
   nonzero_maxannulus=0;
@@ -68,7 +68,7 @@ void halosigma(
      assert(!isnan(dens[r0]));
     }
     else if(r-rmin[r0]<rmax[r0]-r) { // closer to inner radius of annulus
-     tmin=min(tmindefault,r-rmin[r0]);
+     tmin=std::min(tmindefault,r-rmin[r0]);
      dens[r0]=nfw_Rhop(tmin/rs)*M_PI*tmin*tmin;
      nonzero_maxannulus=nonzero_minannulus=r0;
      assert(!isnan(dens[r0]));
@@ -81,14 +81,14 @@ void halosigma(
      assert(!isnan(dens[r0]));
     }
     else { // closer to outer radius of annulus
-     tmin=min(tmindefault,rmax[r0]-r);
+     tmin=std::min(tmindefault,rmax[r0]-r);
      dens[r0]=nfw_Rhop(tmin/rs)*M_PI*tmin*tmin;
      nonzero_maxannulus=nonzero_minannulus=r0;
      assert(!isnan(dens[r0]));
     }
   }
   else if (r0==0) { // inside innermost sky annulus
-   tmin=max(rmin[0]-r,1.e-4); 
+   tmin=std::max(rmin[0]-r,1.e-4); 
   }
   else { // r0==rsteps-1, in or outside outermost sky annulus
    if(fabs(r-rmax[r0])<1.e-4) // sitting near outer border of outermost sky annulus
@@ -98,17 +98,17 @@ void halosigma(
      nonzero_maxannulus=nonzero_minannulus=r0;
    }
    else if(r-rmin[r0]<rmax[r0]-r) { // closer to inner radius of annulus
-     tmin=min(tmindefault,r-rmin[r0]);
+     tmin=std::min(tmindefault,r-rmin[r0]);
      dens[r0]=nfw_Rhop(tmin/rs)*M_PI*tmin*tmin;
      nonzero_maxannulus=nonzero_minannulus=r0;
      assert(!isnan(dens[r0]));
    } else if (rmax[r0]>r) { // closer to outer radius of annulus but inside
-     tmin=min(tmindefault,rmax[r0]-r);
+     tmin=std::min(tmindefault,rmax[r0]-r);
      dens[r0]=nfw_Rhop(tmin/rs)*M_PI*tmin*tmin; 
      nonzero_maxannulus=nonzero_minannulus=r0;
      assert(!isnan(dens[r0]));
    } else { // outside
-     tmin=max(tmindefault,r-rmax[r0]);
+     tmin=std::max(tmindefault,r-rmax[r0]);
      nonzero_maxannulus=nonzero_minannulus=r0;
    }
   }
@@ -145,7 +145,7 @@ void halosigma(
       break; // far enough outside, break
     }
 
-    double tnext = min(t + rmin[r0]*(rfactor-1.)/ringresolution,t+rs/rsresolution); // 1/5 of smallest affected sky annulus
+    double tnext = std::min(t + rmin[r0]*(rfactor-1.)/ringresolution,t+rs/rsresolution); // 1/5 of smallest affected sky annulus
     
     double sigma  = ample_kappa_NFW_trunc2(t/rs,tau);
     double sigang = sigma*0.5*(tnext*tnext-tprev*tprev); 

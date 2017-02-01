@@ -52,8 +52,8 @@ double beta_from_pz(double zlens, string pzfile)
        return -1.; 
      }
      cout << "### " << z0 << " " << z1 << endl;
-     double zprev=0.;
-     double pprev=0.;
+     double zprev=z0;
+     double pprev=z1;
      
      double sp=0.;
      double sbeta=0.;

@@ -18,10 +18,10 @@
 ###########################################
 ### edit these to have the right c++ compiler and include/library paths for tmv, blas, CCfits
 
-#CPP=g++ -fopenmp 
+CPP=g++ -std=c++0x -fopenmp 
 # this should work on linux / gcc
 
-CPP=c++ -DNO_OMP -DUSE_MULTIMAP
+#CPP=c++ -DNO_OMP -DUSE_MULTIMAP
 # this sould work on MacOS / clang
 
 INCLUDES=-I ~/werc3/include -I ~/include 
@@ -36,7 +36,7 @@ LIBFLAGS_GSL=`gsl-config --libs --cflags`
 
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=8
+CORES=20
 
 ### cluster definition file
 ### simple format with one line per cluster with ID z_lens p_z_source annuli_prefix
@@ -48,8 +48,9 @@ CORES=8
 ###                  example for a realistic distribution estimated from data is in stack_pz.tab
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
 ###                  simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
-#CLUSTERS=codex.tab
 CLUSTERS=default.tab
+CLUSTERS=codex.tab
+#CLUSTERS=zlist.tab
 
 ######## END INSTALLATION INSTRUCTIONS ########
 
@@ -75,7 +76,7 @@ software: lut_software template_software model_software tinker nicaea lambda_at_
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell templates_off template_lss      # templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell templates_off templates_lss     # templates for intrinsic covariance components
 
 model: model_corrh model_conc model_ell model_off model_lss				# co-added and resampled temples according to some binning scheme
 
@@ -163,7 +164,7 @@ templates_off:
 	bash helpers/templates_off.sh $(CORES)
 	@echo "========== finished with ell templates =========="
 
-template_lss:
+templates_lss:
 	@echo "========== checking for availability of lss templates =========="
 	bash helpers/templates_lss.sh $(PZFILES)                         
 	@echo "========== finished with lss templates =========="

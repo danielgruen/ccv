@@ -6,8 +6,6 @@
 #include <cmath>
 #include "../cosmology.h"
 
-using namespace std;
-
 double pow2(double a) { return a*a; }
 double pow3(double a) { return a*a*a; }
 

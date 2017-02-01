@@ -24,7 +24,7 @@ do
   fi 
 
   URL=http://www.usm.uni-muenchen.de/~dgruen/code/templates/corrh_${zlong}.fits
-
+  echo "looking for $URL"
   curl -s --head $URL | head -n 1 | grep "HTTP/1.[01] [23].." > /dev/null
   if [ $? -eq 0 ]
   then    
@@ -40,6 +40,7 @@ do
     if [ ! -s templates/corrh/cov_${zlong}_$m.fits ]
     then
       rm -f templates/corrh/cov_${zlong}_$m.fits
+      echo ./src/template_corrh $1 `bash helpers/calc.sh $m/10` templates/corrh/cov_${zlong}_$m.fits &
       ./src/template_corrh $1 `bash helpers/calc.sh $m/10` templates/corrh/cov_${zlong}_$m.fits &
       n=`expr $n + 1`
     fi

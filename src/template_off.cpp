@@ -13,7 +13,7 @@ int main(int argc, char **argv)
 {
   
   if(argc!=3) {
-   cout << "syntax: " << argv[0] << " [sigma_off/r_s] [output filename]" << endl;
+   std::cout << "syntax: " << argv[0] << " [sigma_off/r_s] [output filename]" << std::endl;
    return 1;
   }
       
@@ -28,7 +28,7 @@ int main(int argc, char **argv)
   }
   catch (FITS::CantCreate)
   {
-    cerr << "error, can't create fits file" << endl;
+    std::cerr << "error, can't create fits file" << std::endl;
     return 1;
   } 
   
