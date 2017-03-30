@@ -8,8 +8,7 @@
 CC         = gcc
 
 FFTW_PREFIX=/home/tom/code/fftw
-GSL_PREFIX=`/home/tom/code/gsl/gsl-2.1/gsl-config --prefix`
-LIBFLAGS_GSL=`/home/tom/code/gsl/gsl-2.1/gsl-config --libs --cflags`
+LIBFLAGS_GSL=$(LIBFLAGS_GSL) 
 FFTW       = $(FFTW_PREFIX)
 GSL        = $(GSL_PREFIX)
 
@@ -39,9 +38,9 @@ EXT = a
 
 
 #cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC) `gsl-config --cflags`
-cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC)
+cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC) $(LIBFLAGS_GSL)
 # lflags     = -L$(FFTW)/lib -L$(GSL)/lib `/gsl-config --libs` -lfftw3
-lflags     = -L$(FFTW)/lib -L$(GSL)/lib -lfftw3 -lm -L$(LIBFLAGS_GSL)
+lflags     = -L$(FFTW)/lib -L$(GSL)/lib -lfftw3 -lm $(LIBFLAGS_GSL)
 
 #objs      := $(patsubst %.h,%.o,$(wildcard *.h))
 objs       = cosmo.o lensing.o reduced_fit.o decomp_eb.o sn1a.o nofz.o lensing_3rd.o \

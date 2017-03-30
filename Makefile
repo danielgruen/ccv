@@ -27,7 +27,7 @@ CPP=g++ -std=c++0x -fopenmp
 INCLUDES=-I ~/werc3/include -I ~/include 
 # add wherever else tmv and CCfits may be
 
-FFTW_PREFIX=/sw
+FFTW_PREFIX=/data/soft/fftw/3.3.6/
 GSL_PREFIX=`gsl-config --prefix`
 
 LIBFLAGS=-L /sw/lib -L ~/werc3/lib -L ~/lib -lCCfits -lcfitsio
@@ -49,7 +49,7 @@ CORES=20
 ###       annuli_prefix is the annuli definition file prefix (expected in this directory with suffix .tab)
 ###                  simple format with N_annuli in the first line and then one line of theta_min theta_max for each annulus
 CLUSTERS=default.tab
-CLUSTERS=codex.tab
+#CLUSTERS=codex.tab
 #CLUSTERS=zlist.tab
 
 ######## END INSTALLATION INSTRUCTIONS ########
@@ -99,7 +99,7 @@ src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 	$(CPP) -o src/mktinkerconf src/mktinkerconf.cpp	
 
 nicaea: src/mknicaeaconf
-	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=/sw GSL_PREFIX=/sw
+	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=$(FFTW_PREFIX) GSL_PREFIX=$(GSL_PREFIX) LIBFLAGS_GSL=$(LIBFLAGS_GSL)
 
 src/mknicaeaconf: src/mknicaeaconf.cpp src/cosmology.h
 	$(CPP) -o src/mknicaeaconf src/mknicaeaconf.cpp	
@@ -284,4 +284,3 @@ pub/templates_ell.tar.gz: templates/ell/cov_100.fits
 pub/ccv.tar.gz:
 	-git commit -a
 	bash helpers/pack_software.sh $(VERSION)
-	

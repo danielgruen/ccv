@@ -94,7 +94,7 @@ software: lut_software template_software model_software tinker nicaea lambda_at_
 
 lut: lut_2pc lut_W lut_U lut_sigmam lut_dndM lut_rho0 lut_profiles lut/Pkappa.tab	# look-up tables
 
-templates: templates_corrh templates_conc templates_ell templates_off template_lss      # templates for intrinsic covariance components
+templates: templates_corrh templates_conc templates_ell templates_off templates_lss     # templates for intrinsic covariance components
 
 model: model_corrh model_conc model_ell model_off model_lss				# co-added and resampled temples according to some binning scheme
 
@@ -117,7 +117,7 @@ src/mktinkerconf: src/mktinkerconf.cpp src/cosmology.h
 	$(CPP) -o src/mktinkerconf src/mktinkerconf.cpp	
 
 nicaea: src/mknicaeaconf
-	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=${FFTW_PREFIX} GSL_PREFIX=${GSL_PREFIX}
+	$(MAKE) -C src/nicaea_2.5/Demo FFTW_PREFIX=$(FFTW_PREFIX) GSL_PREFIX=$(GSL_PREFIX) LIBFLAGS_GSL=$(LIBFLAGS_GSL)
 
 src/mknicaeaconf: src/mknicaeaconf.cpp src/cosmology.h
 	$(CPP) -o src/mknicaeaconf src/mknicaeaconf.cpp	
@@ -182,7 +182,7 @@ templates_off:
 	bash helpers/templates_off.sh $(CORES)
 	@echo "========== finished with ell templates =========="
 
-template_lss:
+templates_lss:
 	@echo "========== checking for availability of lss templates =========="
 	bash helpers/templates_lss.sh $(PZFILES)                         
 	@echo "========== finished with lss templates =========="
