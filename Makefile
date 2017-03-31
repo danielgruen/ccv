@@ -36,7 +36,7 @@ LIBFLAGS_GSL=`gsl-config --libs --cflags`
 
 
 ### this is how many processors you'd like to use; only worry about this for non-pre-computed redshifts
-CORES=20
+CORES=1
 
 ### cluster definition file
 ### simple format with one line per cluster with ID z_lens p_z_source annuli_prefix
@@ -91,6 +91,8 @@ template_software: src/template_corrh src/template_corrh_combine src/template_co
 model_software: src/resample_ell src/resample_ell_g src/resample_off src/resample_off_g src/resample_conc src/resample_conc_g src/resample_conc_g src/resample_corrh src/resample_corrh_g src/getmodel src/getmodel_g src/getmodel_ds
 
 lut_software: src/calc_W 
+
+template_kappa_gamma_test: src/template_conc_g src/resample_conc_g_test templates_conc_g model_conc_g model_conc
 
 tinker: src/mktinkerconf
 	$(MAKE) -C src/tinker
@@ -154,6 +156,12 @@ templates_conc:
 	bash helpers/templates_conc.sh $(CORES)
 	@echo "========== finished with conc templates =========="
 
+templates_conc_g:
+	@echo "========== checking for availability of conc_g test templates =========="
+	bash helpers/templates_conc_g.sh $(CORES)
+	@echo "========== finished with conc_g test templates =========="
+
+
 templates_ell:
 	@echo "========== checking for availability of ell templates =========="
 	bash helpers/templates_ell.sh $(CORES)
@@ -180,6 +188,9 @@ src/template_corrh_combine: src/template_corrh_combine.cpp src/corrh/template_co
 src/template_conc: src/template_conc.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
 	$(CPP)  src/template_conc.cpp -o src/template_conc $(INCLUDES) $(LIBFLAGS) 
  
+src/template_conc_g: src/template_conc_g.cpp src/conc/template_conc.h src/enfw/enfw.h src/cosmology.h
+	$(CPP)  src/template_conc_g.cpp -o src/template_conc_g $(INCLUDES) $(LIBFLAGS) 
+ 
 src/template_ell: src/template_ell.cpp src/enfw/template_ell.h src/enfw/enfw.h src/cosmology.h src/filter/filter.o
 	$(CPP)  src/template_ell.cpp src/filter/filter.o -o src/template_ell $(INCLUDES) $(LIBFLAGS) 
  
@@ -202,6 +213,13 @@ model_conc:
 	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 2,4 )) # a list of redshifts and annuli
 	bash helpers/model_conc.sh $(ARGS) $(CORES)
 	@echo "========== finished with conc model =========="
+
+model_conc_g:
+	@echo "========== checking for availability of conc_g test model =========="
+	$(eval ARGS=$(shell cat $(CLUSTERS) | cut -d \  -f 2,4 )) # a list of redshifts and annuli
+	bash helpers/model_conc_g.sh $(ARGS) $(CORES)
+	@echo "========== finished with conc model =========="
+
 
 model_ell:
 	@echo "========== checking for availability of ell model =========="
@@ -238,8 +256,8 @@ src/resample_conc: src/resample_conc.cpp src/conc/template_conc.h src/cosmology.
 src/resample_conc_g: src/resample_conc_g.cpp src/conc/template_conc.h src/cosmology.h
 	$(CPP)  src/resample_conc_g.cpp -o src/resample_conc_g $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
-src/resample_conc_gamma: src/resample_conc_gamma.cpp src/conc/template_conc.h src/cosmology.h
-	$(CPP)  src/resample_conc_gamma.cpp -o src/resample_conc_gamma $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
+src/resample_conc_g_test: src/resample_conc_g_test.cpp src/conc/template_conc.h src/cosmology.h
+	$(CPP)  src/resample_conc_g_test.cpp -o src/resample_conc_g_test $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
 
 src/resample_corrh: src/resample_corrh.cpp src/corrh/template_corrh.h src/cosmology.h
 	$(CPP)  src/resample_corrh.cpp -o src/resample_corrh $(INCLUDES) $(LIBFLAGS) $(LIBFLAGS_TMV)
