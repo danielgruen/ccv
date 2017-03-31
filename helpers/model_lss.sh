@@ -21,11 +21,13 @@ do
   if [ ! -s model/lss_${pz}_${annuli}.fits ]
   then
     rm -f model/lss_${pz}_${annuli}.fits
+    echo ./src/resample_corrh ${annuli}.tab templates/lss_${pz}.fits model/lss_${pz}_${annuli}.fits
     ./src/resample_corrh ${annuli}.tab templates/lss_${pz}.fits model/lss_${pz}_${annuli}.fits
   fi
   if [ ! -s model/gamma/lss_${pz}_${annuli}.fits ]
   then
     rm -f model/gamma/lss_${pz}_${annuli}.fits
+    echo ./src/resample_corrh_g ${annuli}.tab templates/lss_${pz}.fits model/gamma/lss_${pz}_${annuli}.fits
     ./src/resample_corrh_g ${annuli}.tab templates/lss_${pz}.fits model/gamma/lss_${pz}_${annuli}.fits
   fi
  

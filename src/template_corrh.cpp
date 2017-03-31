@@ -23,14 +23,14 @@ double area[rsteps];       // area, Mpc^2
 
 const double zeros[rsteps] = { };
 
-void clear_cov(double cov[rsteps][rsteps])
+void clear_cov(double **cov)
 {
  // clear cov matrix
  for(int i=0; i<rsteps; i++)
    memcpy(cov[i], zeros, rsteps*sizeof(double));
 }
 
-void halo_cov(double dens[rsteps], double cov[rsteps][rsteps],  double kahan[rsteps][rsteps], double dn, int minannulus, int maxannulus)
+void halo_cov(double *dens, double **cov,  double **kahan, double dn, int minannulus, int maxannulus)
 // fills only upper triangle cov[i][j], j>=i
 // Kahan summation
 {
@@ -59,7 +59,7 @@ void halo_cov(double dens[rsteps], double cov[rsteps][rsteps],  double kahan[rst
 
 }
 
-void halo_cov_fill(double cov[][rsteps])
+void halo_cov_fill(double **cov)
 {
   // unnecessary: copy to lower triangle
   for(int i=1; i<rsteps; i++)
@@ -110,8 +110,10 @@ int main(int argc, char **argv)
   rmin2[0]=rmin[0]*rmin[0];
   rmax2[0]=rmax[0]*rmax[0];
   
+  cout << rsteps << endl;
   for(int i=1; i<rsteps; i++)
   {
+    cout << i << endl;
     rmin[i]=rmax[i-1];
     rmax[i]=rmin[i]*rfactor;
     rmin2[i]=rmin[i]*rmin[i];
@@ -122,12 +124,21 @@ int main(int argc, char **argv)
   double thetafac  = pow(rfactor,0.01);
   double theta2fac = M_PI*(pow(thetafac,2)-pow(1./thetafac,2))/2.;
   
-  double dens[nthreads][rsteps];
-  double cov[nthreads][rsteps][rsteps];   // covariance of surface density, [Msol/Mpc^2]^2
-  double kahan[nthreads][rsteps][rsteps]; // buffer for Kahan summation
-  
+  double *dens[nthreads];//[rsteps];
+  double **cov[nthreads];//[rsteps][rsteps];   // covariance of surface density, [Msol/Mpc^2]^2
+  double **kahan[nthreads]; //[rsteps][rsteps]; // buffer for Kahan summation
+
   for(int i=0; i<nthreads; i++)
   {
+    dens[i] = new double[rsteps];
+    cov[i] = new double*[rsteps];
+    kahan[i] = new double*[rsteps];
+    for(int j=0; j<rsteps; j++)
+    {
+      dens[i][j]=0.;
+      cov[i][j] = new double[rsteps];
+      kahan[i][j] = new double[rsteps];
+    }
     clear_cov(cov[i]);
     clear_cov(kahan[i]);
   }

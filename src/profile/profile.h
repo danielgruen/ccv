@@ -2,8 +2,9 @@
 #define _PROFILE_H_
 
 #include "../cosmology.h"
-#include <complex.h>
-#undef complex
+//#include <complex.h>
+//#undef complex
+#include <complex>
 
 double b_nfw(double c200m)
 {
@@ -52,18 +53,19 @@ double ample_kappa_NFW_trunc2 ( double x, double tau )
     return kappa2*frac + kappa1*(1.-frac);
   }
   
+  
   double lnC = log ( tau );
   //double ln2C = lnC + M_LN2;
-  double um1 = u - 1.0;
+  std::complex<double> um1 = u - 1.0;
   double rootu = sqrt ( u );
   //double lnu = log ( u );
   double u2 = u * u;
   //double u3 = u2 * u;
-
-  complex<double> arccosu = cacos ( 1.0 / rootu );
-  complex<double> sqrtum1, arccossqrt;
   
-  sqrtum1 = csqrt ( um1 );
+  std::complex<double> arccosu = std::acos ( std::complex<double>(1.0 / rootu,0) );
+  std::complex<double> sqrtum1, arccossqrt;
+  
+  sqrtum1 = std::sqrt ( um1 );
   if ( u < 1.0 ) sqrtum1 = -1.*sqrtum1;
   arccossqrt = arccosu / sqrtum1;
   
@@ -71,10 +73,10 @@ double ample_kappa_NFW_trunc2 ( double x, double tau )
   double C4 = C2 * C2;
   double C6 = C4 * C2;
   //double C8 = C4 * C4;
-  double rootC2u = sqrt ( C2 + u );
+  double rootC2u = std::sqrt ( C2 + u );
   double messylog = log ( ( rootC2u - tau ) / rootu );
-
-  complex<double> psi1 = C4 / ( 2.0 * ( C2 + 1.0 ) * ( C2 + 1.0 ) * ( C2 + 1.0 ) * u ) *
+  
+  std::complex<double> psi1 = C4 / ( 2.0 * ( C2 + 1.0 ) * ( C2 + 1.0 ) * ( C2 + 1.0 ) * u ) *
     ( 2.0 * ( C2 + 4.0 * u - 3.0 ) * arccossqrt 
       + ( M_PI * ( 3.0 * C2 - 1.0 ) + 2.0 * tau * ( C2 - 3.0 ) * lnC ) / tau
       + ( - C2 * tau * M_PI * ( 4.0 * u + 3.0 * C2 - 1.0 )
@@ -82,7 +84,7 @@ double ample_kappa_NFW_trunc2 ( double x, double tau )
 	      + u * ( 3.0 * C4 - 6.0 * C2 - 1.0 ) ) * messylog ) /
       ( C2 * tau * rootC2u ) );
 
-  complex<double> psi2 = C4 / ( 4.0 * ( C2 + 1.0 ) * ( C2 + 1.0 ) * ( C2 + 1.0 ) *
+  std::complex<double> psi2 = C4 / ( 4.0 * ( C2 + 1.0 ) * ( C2 + 1.0 ) * ( C2 + 1.0 ) *
 		  u2  ) *
     ( ( 10.0 - 8.0 * u - 6.0 * C2 ) * arccossqrt - 4.0 * ( C2 - 3.0 ) * lnC
       + ( 2.0 * C6 + 3.0 * C4 * ( u - 2 ) - u - 6.0 * C2 * u ) /
@@ -97,7 +99,6 @@ double ample_kappa_NFW_trunc2 ( double x, double tau )
 	+ u * ( 4.0 * u + 3.0 * C2 - 1.0 ) )
       + 2.0 * ( C2 + 1.0 ) / um1 * ( 1.0 - arccossqrt ) + 8.0 );
 
-  
   return 4.*real(psi1+u*psi2);
 }
 

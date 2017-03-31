@@ -5,7 +5,9 @@ using namespace std;
 #include <gsl/gsl_sf_bessel.h>
 #include <CCfits/CCfits>
 using namespace CCfits;
+#ifndef NO_OMP
 #include <omp.h>
+#endif
 #include "cosmology.h"
 #include "corrh/template_corrh.h"
 
