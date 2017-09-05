@@ -7,8 +7,7 @@
 
 CC         = gcc
 
-FFTW_PREFIX=/home/tom/code/fftw
-LIBFLAGS_GSL=$(LIBFLAGS_GSL) 
+LIBGSL = $(LIBFLAGS_GSL) 
 FFTW       = $(FFTW_PREFIX)
 GSL        = $(GSL_PREFIX)
 
@@ -37,17 +36,13 @@ EXT = a
 
 
 
-#cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC) `gsl-config --cflags`
-cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC) $(LIBFLAGS_GSL)
-# lflags     = -L$(FFTW)/lib -L$(GSL)/lib `/gsl-config --libs` -lfftw3
-lflags     = -L$(FFTW)/lib -L$(GSL)/lib -lfftw3 -lm $(LIBFLAGS_GSL)
+cflags     = -I$(FFTW)/include -I$(GSL)/include $(OPTIM) $(WARNINGS) $(ARCHFLAGS) $(FPIC) $(LIBGSL)
+lflags     = -L$(FFTW)/lib -L$(GSL)/lib -lfftw3 -lm $(LIBGSL)
 
-#objs      := $(patsubst %.h,%.o,$(wildcard *.h))
 objs       = cosmo.o lensing.o reduced_fit.o decomp_eb.o sn1a.o nofz.o lensing_3rd.o \
              constants.o fr_constants.o emu.o fr_emu.o hubble.o \
 	     cmb_bao.o halomodel.o hod.o errorlist.o io.o maths.o mvdens.o config.o par.o
-exec       = pkappa #lensingdemo halomodeldemo decomp_eb_demo sn1ademo cmb_bao_demo \
-	     third_order_demo cosebi_demo
+exec       = pkappa 
 
 
 all: links_check libnicaea.$(EXT)
@@ -62,30 +57,6 @@ links_check:
 
 pkappa: pkappa.o libnicaea.$(EXT)
 	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-lensingdemo: lensingdemo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-halomodeldemo: halomodeldemo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-decomp_eb_demo: decomp_eb_demo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-cosebi_demo: cosebi_demo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-sn1ademo: sn1ademo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-cmb_bao_demo: cmb_bao_demo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-third_order_demo: third_order_demo.o libnicaea.$(EXT)
-	$(CC) -o $@ $^ $(lflags) -lnicaea -L.
-
-libnicaea.$(EXT_DYN): $(objs)
-	$(LD) $(SHARED) -o $ $@ $^ $(lflags)
 
 libnicaea.a: $(objs)
 	$(AR) -r $@ $^
