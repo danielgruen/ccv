@@ -281,6 +281,7 @@ src/filter/filter.o: src/filter/filter.cpp src/filter/filter.h
 clean:
 	rm -f src/filter/filter.o src/getmodel_g src/getmodel src/resample_corrh_g src/resample_corrh src/resample_conc_g src/resample_conc src/resample_ell_g src/resample_ell src/template_ell src/template_conc src/template_corrh src/template_corrh_combine
 	$(MAKE) clean -C src/tinker
+        $(MAKE) clean -C src/nicaea_2.5/Demo
 
 #### forget about model (and re-do later, e.g. if you have changed your annuli definition)
 
